@@ -8,9 +8,9 @@ import {
   Info,
   X,
   Building2,
-  Users,
   Phone,
-  Navigation
+  Navigation,
+  Thermometer
 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -29,13 +29,152 @@ const zones = ["Todas", "Zona Norte", "Zona Sul", "Zona Leste", "Zona Oeste", "C
 const metricOptions = [
   { value: "coverage", label: "Cobertura Vacinal" },
   { value: "cases", label: "Casos por 1000 hab." },
-  { value: "deaths", label: "Óbitos" },
+  { value: "deaths", label: "Obitos" },
 ]
+
+// Componente do Mapa SVG de Sao Paulo
+function SaoPauloMap({ selectedZone, onZoneClick, zoneSummary, selectedMetric }) {
+  const getZoneHeatColor = (zone) => {
+    const zoneData = zoneSummary.find(z => z.zone === zone)
+    if (!zoneData) return "#e5e7eb"
+    
+    const coverage = zoneData.coverage
+    // Cores de mapa de calor - vermelho (baixo) a verde (alto)
+    if (coverage >= 80) return "#22c55e" // verde
+    if (coverage >= 75) return "#84cc16" // verde-limao
+    if (coverage >= 70) return "#eab308" // amarelo
+    if (coverage >= 65) return "#f97316" // laranja
+    return "#ef4444" // vermelho
+  }
+
+  const isSelected = (zone) => selectedZone === zone
+
+  return (
+    <svg 
+      viewBox="0 0 400 350" 
+      className="w-full h-auto max-h-[400px]"
+      style={{ filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.1))" }}
+    >
+      {/* Fundo do mapa */}
+      <defs>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        <linearGradient id="heatGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#ef4444" />
+          <stop offset="25%" stopColor="#f97316" />
+          <stop offset="50%" stopColor="#eab308" />
+          <stop offset="75%" stopColor="#84cc16" />
+          <stop offset="100%" stopColor="#22c55e" />
+        </linearGradient>
+      </defs>
+
+      {/* Zona Norte */}
+      <path
+        d="M 100 30 L 200 20 L 280 50 L 300 100 L 250 140 L 200 150 L 150 130 L 100 100 Z"
+        fill={getZoneHeatColor("Zona Norte")}
+        stroke={isSelected("Zona Norte") ? "#1e40af" : "#374151"}
+        strokeWidth={isSelected("Zona Norte") ? 4 : 2}
+        className="cursor-pointer transition-all duration-300 hover:opacity-80"
+        onClick={() => onZoneClick("Zona Norte")}
+        filter={isSelected("Zona Norte") ? "url(#glow)" : ""}
+      />
+      <text x="190" y="85" textAnchor="middle" className="fill-gray-800 dark:fill-gray-100 text-xs font-semibold pointer-events-none">
+        Zona Norte
+      </text>
+      <text x="190" y="100" textAnchor="middle" className="fill-gray-600 dark:fill-gray-300 text-[10px] pointer-events-none">
+        {zoneSummary.find(z => z.zone === "Zona Norte")?.coverage}%
+      </text>
+
+      {/* Zona Oeste */}
+      <path
+        d="M 20 120 L 100 100 L 150 130 L 150 200 L 120 250 L 60 230 L 30 180 Z"
+        fill={getZoneHeatColor("Zona Oeste")}
+        stroke={isSelected("Zona Oeste") ? "#1e40af" : "#374151"}
+        strokeWidth={isSelected("Zona Oeste") ? 4 : 2}
+        className="cursor-pointer transition-all duration-300 hover:opacity-80"
+        onClick={() => onZoneClick("Zona Oeste")}
+        filter={isSelected("Zona Oeste") ? "url(#glow)" : ""}
+      />
+      <text x="90" y="170" textAnchor="middle" className="fill-gray-800 dark:fill-gray-100 text-xs font-semibold pointer-events-none">
+        Zona Oeste
+      </text>
+      <text x="90" y="185" textAnchor="middle" className="fill-gray-600 dark:fill-gray-300 text-[10px] pointer-events-none">
+        {zoneSummary.find(z => z.zone === "Zona Oeste")?.coverage}%
+      </text>
+
+      {/* Centro */}
+      <path
+        d="M 150 130 L 200 150 L 250 140 L 260 180 L 240 220 L 200 230 L 160 210 L 150 200 Z"
+        fill={getZoneHeatColor("Centro")}
+        stroke={isSelected("Centro") ? "#1e40af" : "#374151"}
+        strokeWidth={isSelected("Centro") ? 4 : 2}
+        className="cursor-pointer transition-all duration-300 hover:opacity-80"
+        onClick={() => onZoneClick("Centro")}
+        filter={isSelected("Centro") ? "url(#glow)" : ""}
+      />
+      <text x="200" y="180" textAnchor="middle" className="fill-gray-800 dark:fill-gray-100 text-xs font-semibold pointer-events-none">
+        Centro
+      </text>
+      <text x="200" y="195" textAnchor="middle" className="fill-gray-600 dark:fill-gray-300 text-[10px] pointer-events-none">
+        {zoneSummary.find(z => z.zone === "Centro")?.coverage}%
+      </text>
+
+      {/* Zona Leste */}
+      <path
+        d="M 250 140 L 300 100 L 370 120 L 380 180 L 350 250 L 280 260 L 240 220 L 260 180 Z"
+        fill={getZoneHeatColor("Zona Leste")}
+        stroke={isSelected("Zona Leste") ? "#1e40af" : "#374151"}
+        strokeWidth={isSelected("Zona Leste") ? 4 : 2}
+        className="cursor-pointer transition-all duration-300 hover:opacity-80"
+        onClick={() => onZoneClick("Zona Leste")}
+        filter={isSelected("Zona Leste") ? "url(#glow)" : ""}
+      />
+      <text x="310" y="175" textAnchor="middle" className="fill-gray-800 dark:fill-gray-100 text-xs font-semibold pointer-events-none">
+        Zona Leste
+      </text>
+      <text x="310" y="190" textAnchor="middle" className="fill-gray-600 dark:fill-gray-300 text-[10px] pointer-events-none">
+        {zoneSummary.find(z => z.zone === "Zona Leste")?.coverage}%
+      </text>
+
+      {/* Zona Sul */}
+      <path
+        d="M 120 250 L 160 210 L 200 230 L 240 220 L 280 260 L 300 310 L 240 340 L 160 330 L 100 290 Z"
+        fill={getZoneHeatColor("Zona Sul")}
+        stroke={isSelected("Zona Sul") ? "#1e40af" : "#374151"}
+        strokeWidth={isSelected("Zona Sul") ? 4 : 2}
+        className="cursor-pointer transition-all duration-300 hover:opacity-80"
+        onClick={() => onZoneClick("Zona Sul")}
+        filter={isSelected("Zona Sul") ? "url(#glow)" : ""}
+      />
+      <text x="200" y="280" textAnchor="middle" className="fill-gray-800 dark:fill-gray-100 text-xs font-semibold pointer-events-none">
+        Zona Sul
+      </text>
+      <text x="200" y="295" textAnchor="middle" className="fill-gray-600 dark:fill-gray-300 text-[10px] pointer-events-none">
+        {zoneSummary.find(z => z.zone === "Zona Sul")?.coverage}%
+      </text>
+
+      {/* Barra de Legenda do Gradiente de Calor */}
+      <rect x="50" y="320" width="300" height="12" rx="6" fill="url(#heatGradient)" />
+      <text x="50" y="345" className="fill-gray-500 dark:fill-gray-400 text-[9px]">Baixa cobertura</text>
+      <text x="350" y="345" textAnchor="end" className="fill-gray-500 dark:fill-gray-400 text-[9px]">Alta cobertura</text>
+    </svg>
+  )
+}
 
 export function HeatmapSection() {
   const [selectedZone, setSelectedZone] = useState("Todas")
   const [selectedMetric, setSelectedMetric] = useState("coverage")
   const [selectedNeighborhood, setSelectedNeighborhood] = useState(null)
+
+  const handleZoneClick = (zone) => {
+    setSelectedZone(selectedZone === zone ? "Todas" : zone)
+    setSelectedNeighborhood(null)
+  }
 
   const filteredNeighborhoods = useMemo(() => {
     let neighborhoods = [...zonesData]
@@ -44,7 +183,7 @@ export function HeatmapSection() {
       neighborhoods = neighborhoods.filter(n => n.zone === selectedZone)
     }
 
-    // Ordenar por métrica
+    // Ordenar por metrica
     if (selectedMetric === "coverage") {
       neighborhoods.sort((a, b) => a.coverage - b.coverage)
     } else if (selectedMetric === "cases") {
@@ -66,7 +205,7 @@ export function HeatmapSection() {
     if (selectedMetric === "coverage") {
       const coverage = neighborhood.coverage
       if (coverage >= 85) return "bg-green-500"
-      if (coverage >= 75) return "bg-green-400"
+      if (coverage >= 75) return "bg-lime-500"
       if (coverage >= 65) return "bg-yellow-400"
       if (coverage >= 55) return "bg-orange-400"
       return "bg-red-500"
@@ -77,7 +216,7 @@ export function HeatmapSection() {
       if (ratio >= 0.8) return "bg-red-500"
       if (ratio >= 0.6) return "bg-orange-400"
       if (ratio >= 0.4) return "bg-yellow-400"
-      if (ratio >= 0.2) return "bg-green-400"
+      if (ratio >= 0.2) return "bg-lime-500"
       return "bg-green-500"
     }
   }
@@ -86,7 +225,7 @@ export function HeatmapSection() {
     if (selectedMetric === "coverage") {
       const coverage = neighborhood.coverage
       if (coverage >= 80) return "text-green-700 dark:text-green-300"
-      if (coverage >= 70) return "text-green-600 dark:text-green-400"
+      if (coverage >= 70) return "text-lime-700 dark:text-lime-300"
       if (coverage >= 60) return "text-yellow-700 dark:text-yellow-300"
       if (coverage >= 50) return "text-orange-700 dark:text-orange-300"
       return "text-red-700 dark:text-red-300"
@@ -105,7 +244,7 @@ export function HeatmapSection() {
     return summary?.color || "#6b7280"
   }
 
-  // Calcular estatísticas
+  // Calcular estatisticas
   const stats = useMemo(() => {
     const critical = zonesData.filter(n => n.coverage < 55).length
     const alert = zonesData.filter(n => n.coverage >= 55 && n.coverage < 70).length
@@ -116,7 +255,7 @@ export function HeatmapSection() {
     return { critical, alert, ok, avgCoverage, totalCases }
   }, [])
 
-  // UBS mais próxima da zona selecionada
+  // UBS mais proxima da zona selecionada
   const nearestUBS = useMemo(() => {
     if (!selectedNeighborhood) return null
     return awarenessContent.ubsList.find(ubs => ubs.zone === selectedNeighborhood.zone)
@@ -126,65 +265,19 @@ export function HeatmapSection() {
     <section id="mapa" className="py-16 bg-muted/30">
       <div className="container mx-auto px-4">
         <div className="mb-10 text-center">
-          <Badge variant="outline" className="mb-4">Mapa de Calor</Badge>
+          <Badge variant="outline" className="mb-4 gap-2">
+            <Thermometer className="h-3 w-3" />
+            Mapa de Calor
+          </Badge>
           <h2 
             className="mb-3 text-3xl font-bold tracking-tight"
             style={{ fontFamily: 'var(--font-heading)' }}
           >
-            Situação por Zona e Bairro
+            Situacao por Zona e Bairro
           </h2>
           <p className="mx-auto max-w-2xl text-muted-foreground">
-            Visualize a situação de saúde pública em cada bairro de São Paulo
+            Visualize a situacao de saude publica em cada bairro de Sao Paulo. Clique nas zonas do mapa para filtrar.
           </p>
-        </div>
-
-        {/* Resumo por Zona */}
-        <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          {zoneSummary.map((zone) => {
-            const riskLevel = getRiskLevel(zone.coverage)
-            return (
-              <Card 
-                key={zone.zone} 
-                className={`cursor-pointer transition-all hover:shadow-md ${
-                  selectedZone === zone.zone ? 'ring-2 ring-primary' : ''
-                }`}
-                onClick={() => setSelectedZone(selectedZone === zone.zone ? "Todas" : zone.zone)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div 
-                      className="h-10 w-10 rounded-lg flex items-center justify-center"
-                      style={{ backgroundColor: `${zone.color}20` }}
-                    >
-                      <Navigation className="h-5 w-5" style={{ color: zone.color }} />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-sm">{zone.zone}</p>
-                      <p className="text-xs text-muted-foreground">{zone.neighborhoods} bairros</p>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Cobertura</span>
-                      <span className={`font-semibold ${riskLevel.textColor}`}>{zone.coverage}%</span>
-                    </div>
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-                      <div
-                        className={`h-full rounded-full ${riskLevel.color}`}
-                        style={{ width: `${zone.coverage}%` }}
-                      />
-                    </div>
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>{formatNumber(zone.cases)} casos</span>
-                      {zone.criticalAreas > 0 && (
-                        <span className="text-red-500 font-medium">{zone.criticalAreas} áreas críticas</span>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )
-          })}
         </div>
 
         {/* Cards de Resumo */}
@@ -196,7 +289,7 @@ export function HeatmapSection() {
               </div>
               <div>
                 <p className="text-2xl font-bold text-red-600 dark:text-red-400">{stats.critical}</p>
-                <p className="text-sm text-muted-foreground">Bairros Críticos</p>
+                <p className="text-sm text-muted-foreground">Bairros Criticos</p>
               </div>
             </CardContent>
           </Card>
@@ -232,27 +325,78 @@ export function HeatmapSection() {
               </div>
               <div>
                 <p className="text-2xl font-bold">{stats.avgCoverage}%</p>
-                <p className="text-sm text-muted-foreground">Média SP Capital</p>
+                <p className="text-sm text-muted-foreground">Media SP Capital</p>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* Filtros e Lista */}
-          <div className="lg:col-span-2">
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Mapa Visual */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Navigation className="h-5 w-5" />
+                Mapa de Sao Paulo
+              </CardTitle>
+              <CardDescription>
+                Clique em uma zona para ver os bairros. As cores indicam a cobertura vacinal.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <SaoPauloMap 
+                selectedZone={selectedZone}
+                onZoneClick={handleZoneClick}
+                zoneSummary={zoneSummary}
+                selectedMetric={selectedMetric}
+              />
+              
+              {/* Resumo das Zonas */}
+              <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+                {zoneSummary.map((zone) => {
+                  const riskLevel = getRiskLevel(zone.coverage)
+                  const isActive = selectedZone === zone.zone
+                  return (
+                    <button
+                      key={zone.zone}
+                      onClick={() => handleZoneClick(zone.zone)}
+                      className={`rounded-lg border p-3 text-left transition-all hover:shadow-md ${
+                        isActive ? 'ring-2 ring-primary border-primary' : 'border-border'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <div 
+                          className="h-3 w-3 rounded-full"
+                          style={{ backgroundColor: zone.color }}
+                        />
+                        <span className="text-xs font-medium truncate">{zone.zone.replace("Zona ", "")}</span>
+                      </div>
+                      <p className={`text-lg font-bold ${riskLevel.textColor}`}>{zone.coverage}%</p>
+                      <p className="text-[10px] text-muted-foreground">{zone.criticalAreas} areas criticas</p>
+                    </button>
+                  )
+                })}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Lista de Bairros / Detalhes */}
+          <div className="space-y-6">
+            {/* Filtros e Lista de Bairros */}
             <Card>
-              <CardHeader>
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <CardHeader className="pb-3">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <CardTitle>Bairros de São Paulo</CardTitle>
+                    <CardTitle className="text-lg">
+                      {selectedZone === "Todas" ? "Todos os Bairros" : selectedZone}
+                    </CardTitle>
                     <CardDescription>
-                      Clique em um bairro para ver mais detalhes
+                      {filteredNeighborhoods.length} bairros encontrados
                     </CardDescription>
                   </div>
                   <div className="flex gap-2">
                     <Select value={selectedZone} onValueChange={setSelectedZone}>
-                      <SelectTrigger className="w-[140px]">
+                      <SelectTrigger className="w-[130px]">
                         <SelectValue placeholder="Zona" />
                       </SelectTrigger>
                       <SelectContent>
@@ -262,8 +406,8 @@ export function HeatmapSection() {
                       </SelectContent>
                     </Select>
                     <Select value={selectedMetric} onValueChange={setSelectedMetric}>
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Métrica" />
+                      <SelectTrigger className="w-[150px]">
+                        <SelectValue placeholder="Metrica" />
                       </SelectTrigger>
                       <SelectContent>
                         {metricOptions.map(option => (
@@ -278,32 +422,32 @@ export function HeatmapSection() {
               </CardHeader>
               <CardContent>
                 {/* Legenda */}
-                <div className="mb-4 flex flex-wrap items-center gap-4 text-sm">
+                <div className="mb-4 flex flex-wrap items-center gap-3 text-xs">
                   <span className="text-muted-foreground">Legenda:</span>
                   <div className="flex items-center gap-1">
-                    <div className="h-3 w-3 rounded bg-red-500" />
-                    <span>Crítico</span>
+                    <div className="h-2.5 w-2.5 rounded bg-red-500" />
+                    <span>Critico</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <div className="h-3 w-3 rounded bg-orange-400" />
+                    <div className="h-2.5 w-2.5 rounded bg-orange-400" />
                     <span>Alto</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <div className="h-3 w-3 rounded bg-yellow-400" />
-                    <span>Médio</span>
+                    <div className="h-2.5 w-2.5 rounded bg-yellow-400" />
+                    <span>Medio</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <div className="h-3 w-3 rounded bg-green-400" />
+                    <div className="h-2.5 w-2.5 rounded bg-lime-500" />
                     <span>Bom</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <div className="h-3 w-3 rounded bg-green-500" />
+                    <div className="h-2.5 w-2.5 rounded bg-green-500" />
                     <span>Excelente</span>
                   </div>
                 </div>
 
                 {/* Grid de Bairros */}
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 max-h-[320px] overflow-y-auto pr-1">
                   {filteredNeighborhoods.map(neighborhood => {
                     const isSelected = selectedNeighborhood?.id === neighborhood.id
                     const metricValue = getMetricValue(neighborhood)
@@ -312,55 +456,41 @@ export function HeatmapSection() {
                       <button
                         key={neighborhood.id}
                         onClick={() => setSelectedNeighborhood(isSelected ? null : neighborhood)}
-                        className={`group relative flex flex-col items-center justify-center rounded-lg border p-3 transition-all hover:shadow-md ${
+                        className={`group relative flex flex-col items-center justify-center rounded-lg border p-2.5 transition-all hover:shadow-md ${
                           isSelected 
                             ? 'border-primary bg-primary/5 ring-2 ring-primary' 
                             : 'border-border bg-card hover:border-primary/50'
                         }`}
                       >
-                        <div className={`mb-2 h-3 w-full rounded-full ${getMetricColor(neighborhood)}`} />
-                        <span className="text-sm font-medium truncate max-w-full text-center leading-tight">
+                        <div className={`mb-1.5 h-2 w-full rounded-full ${getMetricColor(neighborhood)}`} />
+                        <span className="text-xs font-medium truncate max-w-full text-center leading-tight">
                           {neighborhood.name}
                         </span>
-                        <span className={`text-lg font-bold ${getMetricTextColor(neighborhood)}`}>
+                        <span className={`text-base font-bold ${getMetricTextColor(neighborhood)}`}>
                           {selectedMetric === "coverage" ? `${metricValue}%` : formatNumber(metricValue)}
                         </span>
-                        <Badge 
-                          variant="secondary" 
-                          className="mt-1 text-[10px] px-1.5 py-0"
-                          style={{ 
-                            backgroundColor: `${getZoneColor(neighborhood.zone)}15`,
-                            color: getZoneColor(neighborhood.zone)
-                          }}
-                        >
-                          {neighborhood.zone.replace("Zona ", "")}
-                        </Badge>
                       </button>
                     )
                   })}
                 </div>
               </CardContent>
             </Card>
-          </div>
 
-          {/* Detalhes do Bairro */}
-          <div>
-            <Card className="sticky top-20">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  {selectedNeighborhood ? selectedNeighborhood.name : "Detalhes do Bairro"}
-                  {selectedNeighborhood && (
+            {/* Detalhes do Bairro Selecionado */}
+            {selectedNeighborhood && (
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center justify-between text-lg">
+                    {selectedNeighborhood.name}
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="h-8 w-8"
+                      className="h-7 w-7"
                       onClick={() => setSelectedNeighborhood(null)}
                     >
                       <X className="h-4 w-4" />
                     </Button>
-                  )}
-                </CardTitle>
-                {selectedNeighborhood && (
+                  </CardTitle>
                   <CardDescription className="flex items-center gap-2">
                     <Badge 
                       variant="outline"
@@ -371,78 +501,72 @@ export function HeatmapSection() {
                     >
                       {selectedNeighborhood.zone}
                     </Badge>
+                    <Badge 
+                      variant="outline" 
+                      className={`${getRiskLevel(selectedNeighborhood.coverage).textColor} ${getRiskLevel(selectedNeighborhood.coverage).bgLight}`}
+                    >
+                      Risco {getRiskLevel(selectedNeighborhood.coverage).level}
+                    </Badge>
                   </CardDescription>
-                )}
-              </CardHeader>
-              <CardContent>
-                {selectedNeighborhood ? (
-                  <div className="space-y-6">
-                    {/* Badge de Risco */}
-                    <div className="flex justify-center">
-                      <Badge 
-                        variant="outline" 
-                        className={`px-4 py-2 text-lg ${getRiskLevel(selectedNeighborhood.coverage).textColor} ${getRiskLevel(selectedNeighborhood.coverage).bgLight}`}
-                      >
-                        Risco {getRiskLevel(selectedNeighborhood.coverage).level}
-                      </Badge>
-                    </div>
-
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
                     {/* Cobertura Vacinal */}
                     <div>
-                      <div className="mb-2 flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">Cobertura Vacinal</span>
-                        <span className={`text-lg font-bold ${getRiskLevel(selectedNeighborhood.coverage).textColor}`}>
+                      <div className="mb-1.5 flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Cobertura Vacinal</span>
+                        <span className={`font-bold ${getRiskLevel(selectedNeighborhood.coverage).textColor}`}>
                           {selectedNeighborhood.coverage}%
                         </span>
                       </div>
-                      <div className="h-3 w-full overflow-hidden rounded-full bg-muted">
+                      <div className="h-2.5 w-full overflow-hidden rounded-full bg-muted">
                         <div
                           className={`h-full rounded-full transition-all ${getRiskLevel(selectedNeighborhood.coverage).color}`}
                           style={{ width: `${selectedNeighborhood.coverage}%` }}
                         />
                       </div>
-                      <div className="mt-1 flex justify-between text-xs text-muted-foreground">
+                      <div className="mt-1 flex justify-between text-[10px] text-muted-foreground">
                         <span>0%</span>
                         <span className="text-primary font-medium">Meta: 95%</span>
                         <span>100%</span>
                       </div>
                     </div>
 
-                    {/* Estatísticas */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="rounded-lg bg-muted/50 p-3">
-                        <p className="text-xs text-muted-foreground">Casos Totais</p>
-                        <p className="text-xl font-bold">{formatNumber(selectedNeighborhood.cases)}</p>
+                    {/* Estatisticas */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="rounded-lg bg-muted/50 p-2.5">
+                        <p className="text-[10px] text-muted-foreground">Casos Totais</p>
+                        <p className="text-lg font-bold">{formatNumber(selectedNeighborhood.cases)}</p>
                       </div>
-                      <div className="rounded-lg bg-muted/50 p-3">
-                        <p className="text-xs text-muted-foreground">Óbitos</p>
-                        <p className="text-xl font-bold text-red-600 dark:text-red-400">
+                      <div className="rounded-lg bg-muted/50 p-2.5">
+                        <p className="text-[10px] text-muted-foreground">Obitos</p>
+                        <p className="text-lg font-bold text-red-600 dark:text-red-400">
                           {formatNumber(selectedNeighborhood.deaths)}
                         </p>
                       </div>
-                      <div className="rounded-lg bg-muted/50 p-3">
-                        <p className="text-xs text-muted-foreground">População</p>
-                        <p className="text-xl font-bold">{formatNumber(selectedNeighborhood.population)}</p>
+                      <div className="rounded-lg bg-muted/50 p-2.5">
+                        <p className="text-[10px] text-muted-foreground">Populacao</p>
+                        <p className="text-lg font-bold">{formatNumber(selectedNeighborhood.population)}</p>
                       </div>
-                      <div className="rounded-lg bg-muted/50 p-3">
-                        <p className="text-xs text-muted-foreground">Casos/1000 hab.</p>
-                        <p className="text-xl font-bold">
+                      <div className="rounded-lg bg-muted/50 p-2.5">
+                        <p className="text-[10px] text-muted-foreground">Casos/1000 hab.</p>
+                        <p className="text-lg font-bold">
                           {Math.round(selectedNeighborhood.cases / selectedNeighborhood.population * 1000)}
                         </p>
                       </div>
                     </div>
 
-                    {/* UBS Próxima */}
+                    {/* UBS Proxima */}
                     {nearestUBS && (
-                      <div className="rounded-lg border bg-primary/5 p-4">
-                        <div className="flex items-start gap-3">
-                          <Building2 className="h-5 w-5 text-primary mt-0.5" />
+                      <div className="rounded-lg border bg-primary/5 p-3">
+                        <div className="flex items-start gap-2.5">
+                          <Building2 className="h-4 w-4 text-primary mt-0.5" />
                           <div className="flex-1">
                             <p className="font-medium text-sm">{nearestUBS.name}</p>
-                            <p className="text-xs text-muted-foreground mt-1">
+                            <p className="text-xs text-muted-foreground mt-0.5">
                               {nearestUBS.address}
                             </p>
-                            <div className="flex items-center gap-1 mt-2 text-xs text-primary">
+                            <div className="flex items-center gap-1 mt-1.5 text-xs text-primary">
                               <Phone className="h-3 w-3" />
                               <span>{nearestUBS.phone}</span>
                             </div>
@@ -451,34 +575,26 @@ export function HeatmapSection() {
                       </div>
                     )}
 
-                    {/* Recomendação */}
+                    {/* Recomendacao */}
                     {selectedNeighborhood.coverage < 70 && (
-                      <div className="rounded-lg border border-orange-200 bg-orange-50 p-4 dark:border-orange-900 dark:bg-orange-950/30">
-                        <div className="flex items-start gap-3">
-                          <AlertTriangle className="h-5 w-5 text-orange-600 dark:text-orange-400 mt-0.5" />
+                      <div className="rounded-lg border border-orange-200 bg-orange-50 p-3 dark:border-orange-900 dark:bg-orange-950/30">
+                        <div className="flex items-start gap-2">
+                          <AlertTriangle className="h-4 w-4 text-orange-600 dark:text-orange-400 mt-0.5" />
                           <div>
-                            <p className="font-medium text-orange-800 dark:text-orange-200">
-                              Atenção Recomendada
+                            <p className="font-medium text-sm text-orange-800 dark:text-orange-200">
+                              Atencao Recomendada
                             </p>
-                            <p className="mt-1 text-sm text-orange-700 dark:text-orange-300">
-                              Este bairro está abaixo da meta de cobertura vacinal. 
-                              Procure a UBS mais próxima para se vacinar.
+                            <p className="mt-0.5 text-xs text-orange-700 dark:text-orange-300">
+                              Este bairro esta abaixo da meta. Procure uma UBS para se vacinar.
                             </p>
                           </div>
                         </div>
                       </div>
                     )}
                   </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-8 text-center">
-                    <MapPin className="mb-4 h-12 w-12 text-muted-foreground/50" />
-                    <p className="text-muted-foreground">
-                      Selecione um bairro para ver informações detalhadas
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </div>
