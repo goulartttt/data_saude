@@ -11,7 +11,25 @@ import {
   AlertTriangle
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { diseaseData, formatNumber } from "@/lib/health-data"
+
+// Estados em alerta com cobertura abaixo de 60%
+const estadosEmAlerta = [
+  { nome: "Amazonas", cobertura: 52 },
+  { nome: "Roraima", cobertura: 48 },
+  { nome: "Amapa", cobertura: 55 },
+  { nome: "Para", cobertura: 58 },
+  { nome: "Maranhao", cobertura: 54 },
+  { nome: "Piaui", cobertura: 57 },
+  { nome: "Acre", cobertura: 51 },
+  { nome: "Rondonia", cobertura: 59 },
+]
 
 const getTrendIcon = (trend) => {
   if (trend === "up") return { Icon: TrendingUp, color: "text-red-500", bg: "bg-red-500/10" }
@@ -103,22 +121,44 @@ export function StatsSection() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Estados em Alerta
-              </CardTitle>
-              <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-orange-600">
-                8
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Cobertura abaixo de 60%
-              </p>
-            </CardContent>
-          </Card>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Card className="cursor-pointer hover:shadow-md transition-shadow">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      Estados em Alerta
+                    </CardTitle>
+                    <AlertTriangle className="h-4 w-4 text-orange-500" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-orange-600">
+                      8
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Passe o mouse para ver detalhes
+                    </p>
+                  </CardContent>
+                </Card>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="w-64 p-0">
+                <div className="p-3">
+                  <p className="font-semibold text-sm mb-2 flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-orange-500" />
+                    Estados com cobertura abaixo de 60%
+                  </p>
+                  <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                    {estadosEmAlerta.map((estado, index) => (
+                      <div key={index} className="flex items-center justify-between text-xs">
+                        <span>{estado.nome}</span>
+                        <span className="font-medium text-orange-600">{estado.cobertura}%</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
 
         {/* Disease Cards */}

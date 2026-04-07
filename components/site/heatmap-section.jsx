@@ -9,7 +9,10 @@ import {
   Building2,
   Phone,
   Navigation,
-  Thermometer
+  Thermometer,
+  Bug,
+  HeartPulse,
+  Skull
 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -25,11 +28,42 @@ import { zonesData, zoneSummary, awarenessContent, formatNumber, getRiskLevel } 
 
 const zones = ["Todas", "Zona Norte", "Zona Sul", "Zona Leste", "Zona Oeste", "Centro"]
 
+const diseaseOptions = [
+  { value: "all", label: "Todas as Doencas", icon: Skull },
+  { value: "dengue", label: "Dengue", icon: Bug },
+  { value: "hiv", label: "HIV/AIDS", icon: HeartPulse },
+  { value: "malaria", label: "Malaria", icon: AlertTriangle },
+]
+
 const metricOptions = [
   { value: "coverage", label: "Cobertura Vacinal" },
   { value: "cases", label: "Casos por 1000 hab." },
   { value: "deaths", label: "Obitos" },
 ]
+
+// Funcao para gerar dados de doencas por bairro (simulado com base nos dados existentes)
+const generateDiseaseData = (neighborhood) => {
+  // Usar o nome do bairro como seed para gerar numeros consistentes
+  const seed = neighborhood.name.length + neighborhood.population
+  const dengueRatio = 0.65 + ((seed % 20) / 100)
+  const hivRatio = 0.25 - ((seed % 15) / 100)
+  const malariaRatio = 0.10 + ((seed % 10) / 100)
+  
+  return {
+    dengue: {
+      cases: Math.round(neighborhood.cases * dengueRatio),
+      deaths: Math.round(neighborhood.deaths * dengueRatio),
+    },
+    hiv: {
+      cases: Math.round(neighborhood.cases * hivRatio),
+      deaths: Math.round(neighborhood.deaths * hivRatio),
+    },
+    malaria: {
+      cases: Math.round(neighborhood.cases * malariaRatio),
+      deaths: Math.round(neighborhood.deaths * malariaRatio),
+    },
+  }
+}
 
 // Mapa SVG com contorno realista de Sao Paulo
 function SaoPauloMap({ selectedZone, onZoneClick, zoneSummary, selectedMetric }) {
@@ -368,12 +402,22 @@ function SaoPauloMap({ selectedZone, onZoneClick, zoneSummary, selectedMetric })
 
 export function HeatmapSection() {
   const [selectedZone, setSelectedZone] = useState("Todas")
+  const [selectedDisease, setSelectedDisease] = useState("all")
   const [selectedMetric, setSelectedMetric] = useState("coverage")
   const [selectedNeighborhood, setSelectedNeighborhood] = useState(null)
 
   const handleZoneClick = (zone) => {
     setSelectedZone(selectedZone === zone ? "Todas" : zone)
     setSelectedNeighborhood(null)
+  }
+
+  // Funcao para obter casos/mortes filtrados por doenca
+  const getFilteredStats = (neighborhood) => {
+    if (selectedDisease === "all") {
+      return { cases: neighborhood.cases, deaths: neighborhood.deaths }
+    }
+    const diseaseData = generateDiseaseData(neighborhood)
+    return diseaseData[selectedDisease]
   }
 
   const filteredNeighborhoods = useMemo(() => {
@@ -383,22 +427,31 @@ export function HeatmapSection() {
       neighborhoods = neighborhoods.filter(n => n.zone === selectedZone)
     }
 
-    // Ordenar por metrica
+    // Ordenar por metrica considerando a doenca selecionada
     if (selectedMetric === "coverage") {
       neighborhoods.sort((a, b) => a.coverage - b.coverage)
     } else if (selectedMetric === "cases") {
-      neighborhoods.sort((a, b) => (b.cases / b.population * 1000) - (a.cases / a.population * 1000))
+      neighborhoods.sort((a, b) => {
+        const aCases = getFilteredStats(a).cases
+        const bCases = getFilteredStats(b).cases
+        return (bCases / b.population * 1000) - (aCases / a.population * 1000)
+      })
     } else {
-      neighborhoods.sort((a, b) => b.deaths - a.deaths)
+      neighborhoods.sort((a, b) => {
+        const aDeaths = getFilteredStats(a).deaths
+        const bDeaths = getFilteredStats(b).deaths
+        return bDeaths - aDeaths
+      })
     }
 
     return neighborhoods
-  }, [selectedZone, selectedMetric])
+  }, [selectedZone, selectedMetric, selectedDisease])
 
   const getMetricValue = (neighborhood) => {
+    const stats = getFilteredStats(neighborhood)
     if (selectedMetric === "coverage") return neighborhood.coverage
-    if (selectedMetric === "cases") return Math.round(neighborhood.cases / neighborhood.population * 1000)
-    return neighborhood.deaths
+    if (selectedMetric === "cases") return Math.round(stats.cases / neighborhood.population * 1000)
+    return stats.deaths
   }
 
   const getMetricColor = (neighborhood) => {
@@ -557,11 +610,31 @@ export function HeatmapSection() {
                     <Building2 className="h-5 w-5 text-primary" />
                     Bairros {selectedZone !== "Todas" && `- ${selectedZone}`}
                   </CardTitle>
-                  <CardDescription>
-                    {filteredNeighborhoods.length} bairros encontrados
+                  <CardDescription className="flex flex-wrap items-center gap-2">
+                    <span>{filteredNeighborhoods.length} bairros encontrados</span>
+                    {selectedDisease !== "all" && (
+                      <Badge variant="secondary" className="text-xs">
+                        {diseaseOptions.find(d => d.value === selectedDisease)?.label}
+                      </Badge>
+                    )}
                   </CardDescription>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
+                  <Select value={selectedDisease} onValueChange={setSelectedDisease}>
+                    <SelectTrigger className="w-[150px] h-9">
+                      <SelectValue placeholder="Doenca" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {diseaseOptions.map(opt => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          <span className="flex items-center gap-2">
+                            <opt.icon className="h-3.5 w-3.5" />
+                            {opt.label}
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <Select value={selectedZone} onValueChange={setSelectedZone}>
                     <SelectTrigger className="w-[130px] h-9">
                       <SelectValue placeholder="Zona" />
@@ -573,7 +646,7 @@ export function HeatmapSection() {
                     </SelectContent>
                   </Select>
                   <Select value={selectedMetric} onValueChange={setSelectedMetric}>
-                    <SelectTrigger className="w-[140px] h-9">
+                    <SelectTrigger className="w-[150px] h-9">
                       <SelectValue placeholder="Metrica" />
                     </SelectTrigger>
                     <SelectContent>
@@ -643,14 +716,41 @@ export function HeatmapSection() {
                   </p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Casos Registrados</p>
-                  <p className="text-2xl font-bold">{formatNumber(selectedNeighborhood.cases)}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Casos {selectedDisease !== "all" ? `(${diseaseOptions.find(d => d.value === selectedDisease)?.label})` : "Registrados"}
+                  </p>
+                  <p className="text-2xl font-bold">{formatNumber(getFilteredStats(selectedNeighborhood).cases)}</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">Obitos</p>
-                  <p className="text-2xl font-bold text-red-600">{selectedNeighborhood.deaths}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Obitos {selectedDisease !== "all" ? `(${diseaseOptions.find(d => d.value === selectedDisease)?.label})` : ""}
+                  </p>
+                  <p className="text-2xl font-bold text-red-600">{getFilteredStats(selectedNeighborhood).deaths}</p>
                 </div>
               </div>
+              
+              {/* Detalhamento por doenca quando "Todas" esta selecionado */}
+              {selectedDisease === "all" && (
+                <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                  {["dengue", "hiv", "malaria"].map((disease) => {
+                    const diseaseInfo = diseaseOptions.find(d => d.value === disease)
+                    const stats = generateDiseaseData(selectedNeighborhood)[disease]
+                    const IconComponent = diseaseInfo?.icon
+                    return (
+                      <div key={disease} className="rounded-lg border p-3">
+                        <div className="flex items-center gap-2 mb-2">
+                          {IconComponent && <IconComponent className="h-4 w-4 text-muted-foreground" />}
+                          <span className="font-medium text-sm">{diseaseInfo?.label}</span>
+                        </div>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-muted-foreground">Casos: <strong className="text-foreground">{stats.cases}</strong></span>
+                          <span className="text-muted-foreground">Obitos: <strong className="text-red-600">{stats.deaths}</strong></span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
 
               {nearestUBS && (
                 <div className="mt-6 p-4 bg-muted/50 rounded-lg">
