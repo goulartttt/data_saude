@@ -209,3 +209,60 @@ export const getRiskColor = (level: RegionData["riskLevel"]) => {
 export const formatNumber = (num: number): string => {
   return new Intl.NumberFormat("pt-BR").format(num)
 }
+
+// Dados de casos por estado brasileiro
+export interface StateData {
+  uf: string
+  name: string
+  cases: number
+  deaths: number
+  coverage: number
+  population: number
+}
+
+export const brazilStatesData: StateData[] = [
+  { uf: "AC", name: "Acre", cases: 8920, deaths: 45, coverage: 62, population: 906876 },
+  { uf: "AL", name: "Alagoas", cases: 45230, deaths: 312, coverage: 58, population: 3365351 },
+  { uf: "AP", name: "Amapá", cases: 6780, deaths: 28, coverage: 55, population: 877613 },
+  { uf: "AM", name: "Amazonas", cases: 89450, deaths: 890, coverage: 52, population: 4269995 },
+  { uf: "BA", name: "Bahia", cases: 234560, deaths: 1890, coverage: 62, population: 14985284 },
+  { uf: "CE", name: "Ceará", cases: 178900, deaths: 1456, coverage: 65, population: 9240580 },
+  { uf: "DF", name: "Distrito Federal", cases: 67890, deaths: 423, coverage: 78, population: 3094325 },
+  { uf: "ES", name: "Espírito Santo", cases: 89230, deaths: 567, coverage: 72, population: 4108508 },
+  { uf: "GO", name: "Goiás", cases: 145670, deaths: 1023, coverage: 68, population: 7206589 },
+  { uf: "MA", name: "Maranhão", cases: 123450, deaths: 890, coverage: 54, population: 7153262 },
+  { uf: "MT", name: "Mato Grosso", cases: 78900, deaths: 489, coverage: 64, population: 3567234 },
+  { uf: "MS", name: "Mato Grosso do Sul", cases: 56780, deaths: 345, coverage: 71, population: 2839188 },
+  { uf: "MG", name: "Minas Gerais", cases: 456780, deaths: 3456, coverage: 68, population: 21411923 },
+  { uf: "PA", name: "Pará", cases: 167890, deaths: 1234, coverage: 51, population: 8777124 },
+  { uf: "PB", name: "Paraíba", cases: 67890, deaths: 478, coverage: 63, population: 4059905 },
+  { uf: "PR", name: "Paraná", cases: 234560, deaths: 1890, coverage: 81, population: 11597484 },
+  { uf: "PE", name: "Pernambuco", cases: 189450, deaths: 1567, coverage: 61, population: 9674793 },
+  { uf: "PI", name: "Piauí", cases: 45230, deaths: 312, coverage: 59, population: 3289290 },
+  { uf: "RJ", name: "Rio de Janeiro", cases: 567890, deaths: 4567, coverage: 72, population: 17503349 },
+  { uf: "RN", name: "Rio Grande do Norte", cases: 78900, deaths: 534, coverage: 66, population: 3560903 },
+  { uf: "RS", name: "Rio Grande do Sul", cases: 289450, deaths: 2345, coverage: 79, population: 11466630 },
+  { uf: "RO", name: "Rondônia", cases: 34560, deaths: 234, coverage: 60, population: 1815278 },
+  { uf: "RR", name: "Roraima", cases: 5670, deaths: 23, coverage: 53, population: 652713 },
+  { uf: "SC", name: "Santa Catarina", cases: 189450, deaths: 1456, coverage: 82, population: 7338473 },
+  { uf: "SP", name: "São Paulo", cases: 1234560, deaths: 9876, coverage: 78, population: 46649132 },
+  { uf: "SE", name: "Sergipe", cases: 34560, deaths: 234, coverage: 64, population: 2338474 },
+  { uf: "TO", name: "Tocantins", cases: 23450, deaths: 145, coverage: 57, population: 1607363 },
+]
+
+export const getHeatmapColor = (value: number, max: number): string => {
+  const ratio = value / max
+  if (ratio > 0.8) return "#7f1d1d" // red-900
+  if (ratio > 0.6) return "#dc2626" // red-600
+  if (ratio > 0.4) return "#f97316" // orange-500
+  if (ratio > 0.2) return "#facc15" // yellow-400
+  return "#22c55e" // green-500
+}
+
+export const getCoverageColor = (coverage: number): string => {
+  if (coverage >= 80) return "#15803d" // green-700
+  if (coverage >= 70) return "#22c55e" // green-500
+  if (coverage >= 60) return "#facc15" // yellow-400
+  if (coverage >= 50) return "#f97316" // orange-500
+  return "#dc2626" // red-600
+}

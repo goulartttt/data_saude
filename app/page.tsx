@@ -5,6 +5,7 @@ import { Header } from "@/components/dashboard/header"
 import { StatsCards } from "@/components/dashboard/stats-cards"
 import { DiseaseCharts } from "@/components/dashboard/disease-charts"
 import { RiskMap } from "@/components/dashboard/risk-map"
+import { BrazilHeatmap } from "@/components/dashboard/brazil-heatmap"
 import { DateFilter } from "@/components/dashboard/date-filter"
 import { AwarenessSection } from "@/components/dashboard/awareness-section"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -74,6 +75,7 @@ export default function DashboardPage() {
             <div className="grid gap-6 xl:grid-cols-2">
               <DiseaseCharts dateRange={dateRange} />
             </div>
+            <BrazilHeatmap />
             <RiskMap />
           </TabsContent>
 
@@ -81,7 +83,8 @@ export default function DashboardPage() {
             <DiseaseCharts dateRange={dateRange} />
           </TabsContent>
 
-          <TabsContent value="map">
+          <TabsContent value="map" className="space-y-6">
+            <BrazilHeatmap />
             <RiskMap />
           </TabsContent>
 
