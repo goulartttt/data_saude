@@ -424,18 +424,18 @@ export function HeatmapSection() {
   const getMetricTextColor = (neighborhood) => {
     if (selectedMetric === "coverage") {
       const coverage = neighborhood.coverage
-      if (coverage >= 80) return "text-green-700 dark:text-green-300"
-      if (coverage >= 70) return "text-lime-700 dark:text-lime-300"
-      if (coverage >= 60) return "text-yellow-700 dark:text-yellow-300"
-      if (coverage >= 50) return "text-orange-700 dark:text-orange-300"
-      return "text-red-700 dark:text-red-300"
+      if (coverage >= 80) return "text-green-700"
+      if (coverage >= 70) return "text-lime-700"
+      if (coverage >= 60) return "text-yellow-700"
+      if (coverage >= 50) return "text-orange-700"
+      return "text-red-700"
     } else {
       const value = getMetricValue(neighborhood)
       const max = Math.max(...zonesData.map(n => getMetricValue(n)))
       const ratio = value / max
-      if (ratio >= 0.6) return "text-red-700 dark:text-red-300"
-      if (ratio >= 0.3) return "text-yellow-700 dark:text-yellow-300"
-      return "text-green-700 dark:text-green-300"
+      if (ratio >= 0.6) return "text-red-700"
+      if (ratio >= 0.3) return "text-yellow-700"
+      return "text-green-700"
     }
   }
 
@@ -479,11 +479,11 @@ export function HeatmapSection() {
         <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardContent className="flex items-center gap-4 p-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
-                <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+                <AlertTriangle className="h-6 w-6 text-red-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-red-600 dark:text-red-400">{stats.critical}</p>
+                <p className="text-2xl font-bold text-red-600">{stats.critical}</p>
                 <p className="text-sm text-muted-foreground">Bairros Criticos</p>
               </div>
             </CardContent>
@@ -491,11 +491,11 @@ export function HeatmapSection() {
 
           <Card>
             <CardContent className="flex items-center gap-4 p-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900/30">
-                <Info className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-yellow-100">
+                <Info className="h-6 w-6 text-yellow-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{stats.alert}</p>
+                <p className="text-2xl font-bold text-yellow-600">{stats.alert}</p>
                 <p className="text-sm text-muted-foreground">Em Alerta</p>
               </div>
             </CardContent>
@@ -503,11 +503,11 @@ export function HeatmapSection() {
 
           <Card>
             <CardContent className="flex items-center gap-4 p-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
-                <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+                <CheckCircle className="h-6 w-6 text-green-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.ok}</p>
+                <p className="text-2xl font-bold text-green-600">{stats.ok}</p>
                 <p className="text-sm text-muted-foreground">Adequados</p>
               </div>
             </CardContent>
@@ -515,11 +515,11 @@ export function HeatmapSection() {
 
           <Card>
             <CardContent className="flex items-center gap-4 p-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
-                <MapPin className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
+                <MapPin className="h-6 w-6 text-blue-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.avgCoverage}%</p>
+                <p className="text-2xl font-bold text-blue-600">{stats.avgCoverage}%</p>
                 <p className="text-sm text-muted-foreground">Media Geral</p>
               </div>
             </CardContent>

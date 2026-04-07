@@ -77,7 +77,7 @@ export function StatsSection() {
               <Skull className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+              <div className="text-2xl font-bold text-red-600">
                 {mounted ? formatNumber(totalDeaths) : "..."}
               </div>
               <p className="text-xs text-muted-foreground">
@@ -94,7 +94,7 @@ export function StatsSection() {
               <HeartPulse className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+              <div className="text-2xl font-bold text-green-600">
                 78.5%
               </div>
               <p className="text-xs text-muted-foreground">
@@ -111,7 +111,7 @@ export function StatsSection() {
               <AlertTriangle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+              <div className="text-2xl font-bold text-orange-600">
                 8
               </div>
               <p className="text-xs text-muted-foreground">
@@ -162,7 +162,7 @@ export function StatsSection() {
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Óbitos</p>
-                      <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                      <p className="text-2xl font-bold text-red-600">
                         {mounted ? formatNumber(disease.deaths) : "..."}
                       </p>
                     </div>

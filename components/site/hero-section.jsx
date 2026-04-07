@@ -44,14 +44,14 @@ const stats = [
     value: 76.5, 
     icon: Shield,
     suffix: "%",
-    color: "text-green-600 dark:text-green-400"
+    color: "text-green-600"
   },
   { 
     label: "Bairros Monitorados", 
     value: 96, 
     icon: Users,
     suffix: "",
-    color: "text-blue-600 dark:text-blue-400"
+    color: "text-blue-600"
   },
 ]
 
@@ -324,7 +324,7 @@ export function HeroSection() {
                   </div>
                 </div>
                 {index === 0 && (
-                  <div className="mt-3 flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
+                  <div className="mt-3 flex items-center gap-1 text-xs text-green-600">
                     <TrendingUp className="h-3 w-3" />
                     <span>+2.3M esta semana</span>
                   </div>

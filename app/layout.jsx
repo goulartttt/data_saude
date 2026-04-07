@@ -1,6 +1,5 @@
 import { Inter, Poppins } from "next/font/google"
 import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 const poppins = Poppins({ 
@@ -16,16 +15,9 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
-      <body className={`${inter.variable} ${poppins.variable} antialiased`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
+    <html lang="pt-BR">
+      <body className={`${inter.variable} ${poppins.variable} antialiased bg-background text-foreground`}>
+        {children}
       </body>
     </html>
   )
