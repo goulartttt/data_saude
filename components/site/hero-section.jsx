@@ -44,29 +44,20 @@ const stats = [
     value: 76.5, 
     icon: Shield,
     suffix: "%",
-    color: "text-green-600 dark:text-green-400"
+    color: "text-green-600"
   },
   { 
     label: "Bairros Monitorados", 
     value: 96, 
     icon: Users,
     suffix: "",
-    color: "text-blue-600 dark:text-blue-400"
+    color: "text-blue-600"
   },
-]
-
-const vaccineSchedule = [
-  { vaccine: "COVID-19", age: "12+ anos", doses: "2 doses + reforco" },
-  { vaccine: "Gripe (Influenza)", age: "6 meses+", doses: "Anual" },
-  { vaccine: "Dengue", age: "4-60 anos", doses: "3 doses" },
-  { vaccine: "Febre Amarela", age: "9 meses+", doses: "Dose unica" },
-  { vaccine: "Hepatite B", age: "Nascimento+", doses: "3 doses" },
 ]
 
 export function HeroSection() {
   const [mounted, setMounted] = useState(false)
   const [ubsDialogOpen, setUbsDialogOpen] = useState(false)
-  const [vaccineDialogOpen, setVaccineDialogOpen] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -216,85 +207,6 @@ export function HeroSection() {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
-
-            {/* Botao Vacine-se - abre modal com informacoes */}
-            <Dialog open={vaccineDialogOpen} onOpenChange={setVaccineDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="secondary" size="lg" className="gap-2 w-full sm:w-auto">
-                  <Syringe className="h-4 w-4" />
-                  Vacine-se
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-lg">
-                <DialogHeader>
-                  <DialogTitle className="flex items-center gap-2">
-                    <Syringe className="h-5 w-5 text-primary" />
-                    Calendario de Vacinacao
-                  </DialogTitle>
-                  <DialogDescription>
-                    Confira as vacinas disponiveis na rede publica de Sao Paulo
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-3 my-4">
-                  {vaccineSchedule.map((item, index) => (
-                    <div 
-                      key={index}
-                      className="flex items-center gap-4 rounded-lg border p-3"
-                    >
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                        <CheckCircle className="h-5 w-5 text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-sm">{item.vaccine}</h4>
-                        <div className="flex items-center gap-3 mt-1">
-                          <span className="text-xs text-muted-foreground flex items-center gap-1">
-                            <Users className="h-3 w-3" />
-                            {item.age}
-                          </span>
-                          <span className="text-xs text-muted-foreground flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            {item.doses}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="rounded-lg bg-primary/5 border border-primary/20 p-4">
-                  <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
-                    <Shield className="h-4 w-4 text-primary" />
-                    Documentos Necessarios
-                  </h4>
-                  <ul className="text-xs text-muted-foreground space-y-1">
-                    <li>- Documento de identificacao com foto (RG ou CNH)</li>
-                    <li>- Cartao SUS (se tiver)</li>
-                    <li>- Comprovante de residencia</li>
-                    <li>- Carteira de vacinacao</li>
-                  </ul>
-                </div>
-                <DialogFooter className="flex-col gap-2 sm:flex-row">
-                  <Button 
-                    variant="default" 
-                    className="gap-2 w-full sm:w-auto"
-                    onClick={() => {
-                      setVaccineDialogOpen(false)
-                      setUbsDialogOpen(true)
-                    }}
-                  >
-                    <MapPin className="h-4 w-4" />
-                    Encontrar UBS
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="gap-2 w-full sm:w-auto"
-                    onClick={() => scrollToSection('conscientizacao')}
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                    Mais Informacoes
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
           </div>
 
           {/* Stats Grid */}
@@ -324,7 +236,7 @@ export function HeroSection() {
                   </div>
                 </div>
                 {index === 0 && (
-                  <div className="mt-3 flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
+                  <div className="mt-3 flex items-center gap-1 text-xs text-green-600">
                     <TrendingUp className="h-3 w-3" />
                     <span>+2.3M esta semana</span>
                   </div>

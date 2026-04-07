@@ -1,11 +1,13 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import {
   LineChart,
   Line,
   BarChart,
   Bar,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -25,9 +27,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { diseaseData, vaccinationData, formatNumber } from "@/lib/health-data"
-import { Calendar, Filter, TrendingUp, X } from "lucide-react"
+import { Calendar, Filter, TrendingUp, TrendingDown, X, Activity, Bug, HeartPulse, AlertTriangle } from "lucide-react"
 
-// Gerar dados completos com datas reais
+// Gerar dados completos com datas reais - usando seed fixo para evitar problemas de hidratacao
 const generateFullData = () => {
   const months = [
     "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
@@ -36,7 +38,14 @@ const generateFullData = () => {
   const years = [2024, 2025, 2026]
   const data = []
 
-  years.forEach(year => {
+  // Seed fixo para gerar numeros consistentes
+  const seedMultipliers = [
+    [0.95, 0.98, 1.02, 0.97, 1.01, 0.99, 0.96, 1.03, 0.98, 1.00, 0.97, 1.02],
+    [1.01, 0.97, 0.99, 1.02, 0.98, 1.00, 0.96, 0.99, 1.01, 0.98, 1.00, 0.97],
+    [0.98, 1.01, 0.97, 1.00, 0.99, 0.98, 1.02, 0.97, 1.00, 0.99, 0.98, 1.01]
+  ]
+
+  years.forEach((year, yearIndex) => {
     months.forEach((month, monthIndex) => {
       // Nao incluir meses futuros de 2026
       if (year === 2026 && monthIndex > 3) return
@@ -46,15 +55,17 @@ const generateFullData = () => {
       // Tendencia de queda ao longo dos anos
       const yearTrend = year === 2024 ? 1.2 : year === 2025 ? 1.0 : 0.85
 
+      const multiplier = seedMultipliers[yearIndex][monthIndex]
+
       data.push({
         date: `${year}-${String(monthIndex + 1).padStart(2, '0')}`,
         label: `${month} ${year}`,
         month,
         year,
         monthIndex,
-        dengue: Math.round(diseaseData.dengue.monthlyData[monthIndex].cases * summerMultiplier * yearTrend * (0.9 + Math.random() * 0.2)),
-        hiv: Math.round(diseaseData.hiv.monthlyData[monthIndex].cases * yearTrend * (0.95 + Math.random() * 0.1)),
-        malaria: Math.round(diseaseData.malaria.monthlyData[monthIndex].cases * yearTrend * (0.9 + Math.random() * 0.2)),
+        dengue: Math.round(diseaseData.dengue.monthlyData[monthIndex].cases * summerMultiplier * yearTrend * multiplier),
+        hiv: Math.round(diseaseData.hiv.monthlyData[monthIndex].cases * yearTrend * multiplier),
+        malaria: Math.round(diseaseData.malaria.monthlyData[monthIndex].cases * yearTrend * multiplier),
       })
     })
   })
@@ -363,38 +374,70 @@ export function ChartsSection() {
           </CardContent>
         </Card>
 
-        {/* Cards de Resumo do Periodo */}
+        {/* Cards de Resumo do Periodo - Melhorados */}
         <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Card>
+          <Card className="border-l-4 border-l-red-500 hover:shadow-md transition-shadow">
             <CardContent className="p-4">
-              <p className="text-sm text-muted-foreground">Total Dengue</p>
-              <p className="text-2xl font-bold text-red-600">{formatNumber(periodStats.totalDengue)}</p>
-              <p className="text-xs text-muted-foreground">{filteredData.length} meses</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Dengue</p>
+                  <p className="text-2xl font-bold text-red-600">{formatNumber(periodStats.totalDengue)}</p>
+                  <p className="text-xs text-muted-foreground">{filteredData.length} meses analisados</p>
+                </div>
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+                  <Bug className="h-6 w-6 text-red-600" />
+                </div>
+              </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="border-l-4 border-l-purple-500 hover:shadow-md transition-shadow">
             <CardContent className="p-4">
-              <p className="text-sm text-muted-foreground">Total HIV/AIDS</p>
-              <p className="text-2xl font-bold text-purple-600">{formatNumber(periodStats.totalHiv)}</p>
-              <p className="text-xs text-muted-foreground">{filteredData.length} meses</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total HIV/AIDS</p>
+                  <p className="text-2xl font-bold text-purple-600">{formatNumber(periodStats.totalHiv)}</p>
+                  <p className="text-xs text-muted-foreground">{filteredData.length} meses analisados</p>
+                </div>
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-purple-100">
+                  <HeartPulse className="h-6 w-6 text-purple-600" />
+                </div>
+              </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="border-l-4 border-l-amber-500 hover:shadow-md transition-shadow">
             <CardContent className="p-4">
-              <p className="text-sm text-muted-foreground">Total Malaria</p>
-              <p className="text-2xl font-bold text-amber-600">{formatNumber(periodStats.totalMalaria)}</p>
-              <p className="text-xs text-muted-foreground">{filteredData.length} meses</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Malaria</p>
+                  <p className="text-2xl font-bold text-amber-600">{formatNumber(periodStats.totalMalaria)}</p>
+                  <p className="text-xs text-muted-foreground">{filteredData.length} meses analisados</p>
+                </div>
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100">
+                  <AlertTriangle className="h-6 w-6 text-amber-600" />
+                </div>
+              </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className={`border-l-4 hover:shadow-md transition-shadow ${periodStats.trend < 0 ? 'border-l-green-500' : 'border-l-red-500'}`}>
             <CardContent className="p-4">
-              <p className="text-sm text-muted-foreground">Tendencia Dengue</p>
-              <p className={`text-2xl font-bold ${periodStats.trend < 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {periodStats.trend > 0 ? '+' : ''}{periodStats.trend}%
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {periodStats.trend < 0 ? 'Queda' : 'Aumento'} no periodo
-              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Tendencia Dengue</p>
+                  <p className={`text-2xl font-bold ${periodStats.trend < 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {periodStats.trend > 0 ? '+' : ''}{periodStats.trend}%
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {periodStats.trend < 0 ? 'Queda' : 'Aumento'} no periodo
+                  </p>
+                </div>
+                <div className={`flex h-12 w-12 items-center justify-center rounded-full ${periodStats.trend < 0 ? 'bg-green-100' : 'bg-red-100'}`}>
+                  {periodStats.trend < 0 ? (
+                    <TrendingDown className="h-6 w-6 text-green-600" />
+                  ) : (
+                    <TrendingUp className="h-6 w-6 text-red-600" />
+                  )}
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -549,9 +592,9 @@ export function ChartsSection() {
                         <div className="mb-1 flex items-center justify-between text-sm">
                           <span className="font-medium">{vaccine.name}</span>
                           <span className={`font-semibold ${
-                            vaccine.coverage >= 80 ? 'text-green-600 dark:text-green-400' :
-                            vaccine.coverage >= 60 ? 'text-yellow-600 dark:text-yellow-400' :
-                            'text-red-600 dark:text-red-400'
+                            vaccine.coverage >= 80 ? 'text-green-600' :
+                            vaccine.coverage >= 60 ? 'text-yellow-600' :
+                            'text-red-600'
                           }`}>
                             {vaccine.coverage}%
                           </span>
