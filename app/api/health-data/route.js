@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server"
 
-// Simulação de dados de API (em produção, conectaria ao OpenDataSUS)
+// Simulacao de dados de API (em producao, conectaria ao OpenDataSUS)
 // Endpoint: https://opendatasus.saude.gov.br/
 
-export async function GET(request: Request) {
+export async function GET(request) {
   const { searchParams } = new URL(request.url)
   const type = searchParams.get("type") || "summary"
   const startDate = searchParams.get("startDate")
   const endDate = searchParams.get("endDate")
 
-  // Simulando latência de API real
+  // Simulando latencia de API real
   await new Promise((resolve) => setTimeout(resolve, 100))
 
   switch (type) {
@@ -39,11 +39,11 @@ export async function GET(request: Request) {
             target: 95,
           },
           byRegion: [
-            { region: "São Paulo", coverage: 78, doses: 35420000 },
+            { region: "Sao Paulo", coverage: 78, doses: 35420000 },
             { region: "Rio de Janeiro", coverage: 72, doses: 11890000 },
             { region: "Minas Gerais", coverage: 68, doses: 14230000 },
             { region: "Bahia", coverage: 62, doses: 9180000 },
-            { region: "Paraná", coverage: 81, doses: 9070000 },
+            { region: "Parana", coverage: 81, doses: 9070000 },
           ],
           vaccines: [
             { name: "COVID-19", doses: 450000000, coverage: 85 },
@@ -101,14 +101,14 @@ export async function GET(request: Request) {
   }
 }
 
-// Metadata para documentação da API
+// Metadata para documentacao da API
 export const metadata = {
-  description: "API de dados de saúde pública do Brasil",
+  description: "API de dados de saude publica do Brasil",
   endpoints: {
-    summary: "Resumo geral de casos e vacinação",
-    vaccination: "Dados detalhados de vacinação",
-    timeseries: "Séries temporais de casos (use startDate e endDate)",
-    regions: "Dados por região com níveis de risco",
+    summary: "Resumo geral de casos e vacinacao",
+    vaccination: "Dados detalhados de vacinacao",
+    timeseries: "Series temporais de casos (use startDate e endDate)",
+    regions: "Dados por regiao com niveis de risco",
   },
-  source: "Dados simulados baseados em padrões do OpenDataSUS",
+  source: "Dados simulados baseados em padroes do OpenDataSUS",
 }
