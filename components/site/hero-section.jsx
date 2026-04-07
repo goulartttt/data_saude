@@ -15,21 +15,21 @@ import { formatNumber } from "@/lib/health-data"
 const stats = [
   { 
     label: "Doses Aplicadas", 
-    value: 234567890, 
+    value: 34567890, 
     icon: Syringe,
     suffix: "",
     color: "text-primary"
   },
   { 
     label: "Cobertura Vacinal", 
-    value: 78.5, 
+    value: 76.5, 
     icon: Shield,
     suffix: "%",
     color: "text-green-600 dark:text-green-400"
   },
   { 
-    label: "Municípios Atendidos", 
-    value: 5570, 
+    label: "Bairros Monitorados", 
+    value: 96, 
     icon: Users,
     suffix: "",
     color: "text-blue-600 dark:text-blue-400"
@@ -66,14 +66,14 @@ export function HeroSection() {
           >
             Painel de Saúde{" "}
             <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Pública do Brasil
+              Pública de São Paulo
             </span>
           </h1>
 
           {/* Description */}
           <p className="mx-auto mb-10 max-w-2xl text-lg text-muted-foreground text-pretty">
             Acompanhe em tempo real os dados de vacinação, casos de doenças e indicadores 
-            de saúde pública. Informação é o primeiro passo para a prevenção.
+            de saúde pública da cidade de São Paulo, por zona e bairro.
           </p>
 
           {/* CTA Buttons */}

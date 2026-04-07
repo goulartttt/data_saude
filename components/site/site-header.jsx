@@ -44,9 +44,9 @@ export function SiteHeader() {
           </div>
           <div className="flex flex-col">
             <span className="text-lg font-semibold leading-none tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
-              Saúde Brasil
+              Saúde SP
             </span>
-            <span className="text-xs text-muted-foreground">Ministério da Saúde</span>
+            <span className="text-xs text-muted-foreground">Secretaria Municipal de Saúde</span>
           </div>
         </Link>
 
