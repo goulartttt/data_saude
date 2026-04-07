@@ -114,7 +114,6 @@ export function LeafletHeatmap() {
 
       try {
         const L = (await import("leaflet")).default
-        await import("leaflet/dist/leaflet.css")
         
         // Carregar leaflet.heat
         await import("leaflet.heat")
