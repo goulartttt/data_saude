@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { CalendarIcon, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -46,8 +46,9 @@ export function DateFilter({ dateRange, onDateRangeChange }: DateFilterProps) {
   const [startYear, setStartYear] = useState(dateRange.start.getFullYear().toString())
   const [endMonth, setEndMonth] = useState(dateRange.end.getMonth().toString())
   const [endYear, setEndYear] = useState(dateRange.end.getFullYear().toString())
+  const [formattedRange, setFormattedRange] = useState("")
 
-  const formatDateRange = () => {
+  useEffect(() => {
     const startStr = dateRange.start.toLocaleDateString("pt-BR", {
       month: "short",
       year: "numeric",
@@ -56,8 +57,8 @@ export function DateFilter({ dateRange, onDateRangeChange }: DateFilterProps) {
       month: "short",
       year: "numeric",
     })
-    return `${startStr} - ${endStr}`
-  }
+    setFormattedRange(`${startStr} - ${endStr}`)
+  }, [dateRange])
 
   const handlePresetClick = (preset: typeof presetRanges[0]) => {
     let start: Date
@@ -90,7 +91,7 @@ export function DateFilter({ dateRange, onDateRangeChange }: DateFilterProps) {
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className="gap-2">
             <CalendarIcon className="h-4 w-4" />
-            <span className="hidden sm:inline">{formatDateRange()}</span>
+            <span className="hidden sm:inline">{formattedRange || "Carregando..."}</span>
             <span className="sm:hidden">Período</span>
             <ChevronDown className="h-4 w-4 opacity-50" />
           </Button>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Header } from "@/components/dashboard/header"
 import { StatsCards } from "@/components/dashboard/stats-cards"
 import { DiseaseCharts } from "@/components/dashboard/disease-charts"
@@ -15,6 +15,11 @@ export default function DashboardPage() {
     start: new Date("2024-01-01"),
     end: new Date(),
   })
+  const [lastUpdate, setLastUpdate] = useState("")
+
+  useEffect(() => {
+    setLastUpdate(new Date().toLocaleDateString("pt-BR"))
+  }, [])
 
   return (
     <div className="min-h-screen bg-background">
@@ -95,7 +100,7 @@ export default function DashboardPage() {
               </p>
             </div>
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
-              <span>Última atualização: {new Date().toLocaleDateString("pt-BR")}</span>
+              <span>Última atualização: {lastUpdate || "..."}</span>
               <span className="hidden sm:inline">|</span>
               <span className="hidden sm:inline">Versão 1.0</span>
             </div>
