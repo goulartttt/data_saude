@@ -3,7 +3,6 @@ import { HeroSection } from "@/components/site/hero-section"
 import { StatsSection } from "@/components/site/stats-section"
 import { ChartsSection } from "@/components/site/charts-section"
 import { HeatmapSection } from "@/components/site/heatmap-section"
-import { LeafletHeatmap } from "@/components/site/leaflet-heatmap"
 import { AwarenessSection } from "@/components/site/awareness-section"
 import { SiteFooter } from "@/components/site/site-footer"
 
@@ -17,7 +16,6 @@ export default function HomePage() {
         <StatsSection />
         <ChartsSection />
         <HeatmapSection />
-        <LeafletHeatmap />
         <AwarenessSection />
       </main>
       

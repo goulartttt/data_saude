@@ -8,7 +8,9 @@ import {
   TrendingUp, 
   TrendingDown,
   Minus,
-  AlertTriangle
+  AlertTriangle,
+  Activity,
+  ShieldAlert
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -17,7 +19,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { diseaseData, formatNumber } from "@/lib/health-data"
+import { diseaseData, formatNumber, getDiseaseSummary, realDiseaseData, monthKeys } from "@/lib/health-data"
 
 // Estados em alerta com cobertura abaixo de 60%
 const estadosEmAlerta = [
@@ -32,26 +34,28 @@ const estadosEmAlerta = [
 ]
 
 const getTrendIcon = (trend) => {
-  if (trend === "up") return { Icon: TrendingUp, color: "text-red-500", bg: "bg-red-500/10" }
-  if (trend === "down") return { Icon: TrendingDown, color: "text-green-500", bg: "bg-green-500/10" }
-  return { Icon: Minus, color: "text-gray-500", bg: "bg-gray-500/10" }
+  if (trend === "aumento") return { Icon: TrendingUp, color: "text-red-500", bg: "bg-red-500/10", label: "Subindo" }
+  if (trend === "queda") return { Icon: TrendingDown, color: "text-green-500", bg: "bg-green-500/10", label: "Caindo" }
+  return { Icon: Minus, color: "text-gray-500", bg: "bg-gray-500/10", label: "Estavel" }
 }
 
-const diseaseIcons = {
-  dengue: Bug,
-  hiv: HeartPulse,
-  malaria: AlertTriangle,
+const diseaseConfig = {
+  Dengue: { icon: Bug, color: "#ef4444" },
+  HIV: { icon: HeartPulse, color: "#8b5cf6" },
+  AIDS: { icon: ShieldAlert, color: "#3b82f6" },
+  Malaria: { icon: AlertTriangle, color: "#f59e0b" },
 }
 
 export function StatsSection() {
   const [mounted, setMounted] = useState(false)
+  const summary = getDiseaseSummary()
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  const totalCases = Object.values(diseaseData).reduce((sum, d) => sum + d.cases, 0)
-  const totalDeaths = Object.values(diseaseData).reduce((sum, d) => sum + d.deaths, 0)
+  // Calcular totais reais
+  const totalCases = Object.values(summary).reduce((sum, d) => sum + d.totalGeral, 0)
 
   return (
     <section id="dashboard" className="py-16 bg-muted/30">
@@ -64,52 +68,54 @@ export function StatsSection() {
             Panorama Geral
           </h2>
           <p className="mx-auto max-w-2xl text-muted-foreground">
-            Acompanhe os principais indicadores de saúde pública do Brasil
+            Acompanhe os principais indicadores de saude publica do Brasil - Dados reais de 2024 e 2025
           </p>
         </div>
 
         {/* Summary Cards */}
         <div className="mb-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
+          <Card className="border-l-4 border-l-blue-500">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Total de Casos
               </CardTitle>
-              <Bug className="h-4 w-4 text-muted-foreground" />
+              <Activity className="h-4 w-4 text-blue-500" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
                 {mounted ? formatNumber(totalCases) : "..."}
               </div>
               <p className="text-xs text-muted-foreground">
-                Dengue, HIV/AIDS e Malária
+                Dengue, HIV, AIDS e Malaria (2024-2025)
               </p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-l-4 border-l-red-500">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
-                Óbitos Registrados
+                Dengue Total
               </CardTitle>
-              <Skull className="h-4 w-4 text-muted-foreground" />
+              <Bug className="h-4 w-4 text-red-500" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-600">
-                {mounted ? formatNumber(totalDeaths) : "..."}
+                {mounted ? formatNumber(summary.Dengue?.totalGeral || 0) : "..."}
               </div>
               <p className="text-xs text-muted-foreground">
-                Últimos 12 meses
+                <span className={summary.Dengue?.variacao < 0 ? "text-green-600" : "text-red-600"}>
+                  {summary.Dengue?.variacao > 0 ? "+" : ""}{summary.Dengue?.variacao}%
+                </span> vs 2024
               </p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-l-4 border-l-green-500">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Cobertura Vacinal
               </CardTitle>
-              <HeartPulse className="h-4 w-4 text-muted-foreground" />
+              <HeartPulse className="h-4 w-4 text-green-500" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">
@@ -124,7 +130,7 @@ export function StatsSection() {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Card className="cursor-pointer hover:shadow-md transition-shadow">
+                <Card className="cursor-pointer hover:shadow-md transition-shadow border-l-4 border-l-orange-500">
                   <CardHeader className="flex flex-row items-center justify-between pb-2">
                     <CardTitle className="text-sm font-medium text-muted-foreground">
                       Estados em Alerta
@@ -161,73 +167,97 @@ export function StatsSection() {
           </TooltipProvider>
         </div>
 
-        {/* Disease Cards */}
-        <div className="grid gap-4 md:grid-cols-3">
-          {Object.entries(diseaseData).map(([key, disease]) => {
-            const { Icon: TrendIcon, color: trendColor, bg: trendBg } = getTrendIcon(disease.trend)
-            const DiseaseIcon = diseaseIcons[key]
+        {/* Disease Cards - Dados Reais */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {Object.entries(summary).map(([key, disease]) => {
+            const config = diseaseConfig[key]
+            if (!config) return null
+            
+            const { Icon: TrendIcon, color: trendColor, bg: trendBg, label: trendLabel } = getTrendIcon(disease.tendencia)
+            const DiseaseIcon = config.icon
+
+            // Obter dados mensais para o mini grafico
+            const diseaseRecord2024 = realDiseaseData.find(d => d.doenca === key && d.ano === 2024)
+            const diseaseRecord2025 = realDiseaseData.find(d => d.doenca === key && d.ano === 2025)
+            
+            const last6Months = [
+              { month: "Jul", value: diseaseRecord2025?.[monthKeys[6]] || 0 },
+              { month: "Ago", value: diseaseRecord2025?.[monthKeys[7]] || 0 },
+              { month: "Set", value: diseaseRecord2025?.[monthKeys[8]] || 0 },
+              { month: "Out", value: diseaseRecord2025?.[monthKeys[9]] || 0 },
+              { month: "Nov", value: diseaseRecord2025?.[monthKeys[10]] || 0 },
+              { month: "Dez", value: diseaseRecord2025?.[monthKeys[11]] || 0 },
+            ]
 
             return (
-              <Card key={key} className="overflow-hidden">
+              <Card key={key} className="overflow-hidden hover:shadow-lg transition-shadow">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div 
-                        className="flex h-10 w-10 items-center justify-center rounded-lg"
-                        style={{ backgroundColor: `${disease.color}20` }}
+                        className="flex h-10 w-10 items-center justify-center rounded-xl"
+                        style={{ backgroundColor: `${config.color}20` }}
                       >
                         <DiseaseIcon 
                           className="h-5 w-5" 
-                          style={{ color: disease.color }}
+                          style={{ color: config.color }}
                         />
                       </div>
                       <div>
-                        <CardTitle className="text-lg">{disease.name}</CardTitle>
-                        <p className="text-xs text-muted-foreground">Últimos 12 meses</p>
+                        <CardTitle className="text-lg">{disease.nome}</CardTitle>
+                        <p className="text-xs text-muted-foreground">2024-2025</p>
                       </div>
                     </div>
                     <div className={`flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${trendColor} ${trendBg}`}>
                       <TrendIcon className="h-3 w-3" />
-                      {disease.trend === "up" ? "Subindo" : disease.trend === "down" ? "Caindo" : "Estável"}
+                      {trendLabel}
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm text-muted-foreground">Casos</p>
-                      <p className="text-2xl font-bold">
-                        {mounted ? formatNumber(disease.cases) : "..."}
+                      <p className="text-sm text-muted-foreground">2024</p>
+                      <p className="text-xl font-bold">
+                        {mounted ? formatNumber(disease.total2024) : "..."}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">Óbitos</p>
-                      <p className="text-2xl font-bold text-red-600">
-                        {mounted ? formatNumber(disease.deaths) : "..."}
+                      <p className="text-sm text-muted-foreground">2025</p>
+                      <p className="text-xl font-bold">
+                        {mounted ? formatNumber(disease.total2025) : "..."}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-2 pt-2 border-t">
+                    <div className="flex justify-between items-center">
+                      <p className="text-sm text-muted-foreground">Total</p>
+                      <p className="text-lg font-bold" style={{ color: config.color }}>
+                        {mounted ? formatNumber(disease.totalGeral) : "..."}
                       </p>
                     </div>
                   </div>
                   {/* Mini Chart Preview */}
                   <div className="mt-4 flex items-end gap-1 h-12">
-                    {disease.monthlyData.slice(-6).map((month, i) => {
-                      const maxCases = Math.max(...disease.monthlyData.map(m => m.cases))
-                      const height = (month.cases / maxCases) * 100
+                    {last6Months.map((month, i) => {
+                      const maxValue = Math.max(...last6Months.map(m => m.value))
+                      const height = maxValue > 0 ? (month.value / maxValue) * 100 : 10
                       return (
                         <div
                           key={i}
                           className="flex-1 rounded-t transition-all hover:opacity-80"
                           style={{ 
-                            height: `${height}%`,
-                            backgroundColor: disease.color,
+                            height: `${Math.max(height, 5)}%`,
+                            backgroundColor: config.color,
                             opacity: 0.6 + (i * 0.08)
                           }}
-                          title={`${month.month}: ${formatNumber(month.cases)} casos`}
+                          title={`${month.month}: ${formatNumber(month.value)} casos`}
                         />
                       )
                     })}
                   </div>
                   <p className="mt-2 text-center text-xs text-muted-foreground">
-                    Últimos 6 meses
+                    Ultimos 6 meses de 2025
                   </p>
                 </CardContent>
               </Card>
