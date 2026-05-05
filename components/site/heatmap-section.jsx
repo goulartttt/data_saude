@@ -74,7 +74,7 @@ const generateDiseaseData = (neighborhood) => {
   }
 }
 
-// Mapa SVG estilizado de Sao Paulo
+// Mapa simplificado de Sao Paulo com grid
 function SaoPauloMap({ selectedZone, onZoneClick, zoneSummary }) {
   const [hoveredZone, setHoveredZone] = useState(null)
 
@@ -84,317 +84,125 @@ function SaoPauloMap({ selectedZone, onZoneClick, zoneSummary }) {
     
     const coverage = zoneData.coverage
     if (coverage >= 80) return "#10b981"
-    if (coverage >= 75) return "#34d399"
-    if (coverage >= 70) return "#84cc16"
-    if (coverage >= 65) return "#eab308"
-    if (coverage >= 60) return "#f97316"
-    if (coverage >= 55) return "#ef4444"
-    return "#dc2626"
+    if (coverage >= 70) return "#22c55e"
+    if (coverage >= 60) return "#eab308"
+    if (coverage >= 50) return "#f97316"
+    return "#ef4444"
   }
 
   const isSelected = (zone) => selectedZone === zone
   const isHovered = (zone) => hoveredZone === zone
 
-  const getZoneOpacity = (zone) => {
-    if (isSelected(zone)) return 1
-    if (isHovered(zone)) return 0.95
-    return 0.85
-  }
+  const zoneInfo = (zone) => zoneSummary.find(z => z.zone === zone)
 
-  const getStrokeWidth = (zone) => {
-    if (isSelected(zone)) return 4
-    if (isHovered(zone)) return 3
-    return 1.5
-  }
-
-  const getStrokeColor = (zone) => {
-    if (isSelected(zone)) return "#1e40af"
-    if (isHovered(zone)) return "#3b82f6"
-    return "#64748b"
-  }
-
-  const zoneInfo = (zone) => {
-    const data = zoneSummary.find(z => z.zone === zone)
-    return data
+  const ZoneCard = ({ zone, x, y, width, height }) => {
+    const info = zoneInfo(zone)
+    const color = getZoneColor(zone)
+    const selected = isSelected(zone)
+    const hovered = isHovered(zone)
+    
+    return (
+      <g 
+        className="cursor-pointer"
+        onClick={() => onZoneClick(zone)}
+        onMouseEnter={() => setHoveredZone(zone)}
+        onMouseLeave={() => setHoveredZone(null)}
+      >
+        <rect
+          x={x}
+          y={y}
+          width={width}
+          height={height}
+          rx="12"
+          fill={color}
+          stroke={selected ? "#1e40af" : hovered ? "#3b82f6" : "#ffffff"}
+          strokeWidth={selected ? 4 : hovered ? 3 : 2}
+          style={{ 
+            transition: "all 0.2s ease",
+            filter: selected ? "drop-shadow(0 4px 12px rgba(0,0,0,0.25))" : "drop-shadow(0 2px 4px rgba(0,0,0,0.1))"
+          }}
+        />
+        <text 
+          x={x + width / 2} 
+          y={y + height / 2 - 8} 
+          textAnchor="middle" 
+          className="fill-white text-sm font-semibold pointer-events-none"
+          style={{ textShadow: "0 1px 3px rgba(0,0,0,0.4)" }}
+        >
+          {zone}
+        </text>
+        <text 
+          x={x + width / 2} 
+          y={y + height / 2 + 12} 
+          textAnchor="middle" 
+          className="fill-white/90 text-xs font-medium pointer-events-none"
+          style={{ textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}
+        >
+          {info?.coverage}% cobertura
+        </text>
+      </g>
+    )
   }
 
   return (
     <div className="relative w-full">
       <svg 
-        viewBox="0 0 600 520" 
+        viewBox="0 0 400 320" 
         className="w-full h-auto"
-        style={{ maxHeight: "500px" }}
+        style={{ maxHeight: "400px" }}
       >
-        <defs>
-          <linearGradient id="legendGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#dc2626"/>
-            <stop offset="20%" stopColor="#f97316"/>
-            <stop offset="40%" stopColor="#eab308"/>
-            <stop offset="60%" stopColor="#84cc16"/>
-            <stop offset="80%" stopColor="#34d399"/>
-            <stop offset="100%" stopColor="#10b981"/>
-          </linearGradient>
-          
-          <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="3" stdDeviation="4" floodOpacity="0.2"/>
-          </filter>
-
-          <filter id="glowEffect" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="4" result="blur"/>
-            <feFlood floodColor="#3b82f6" floodOpacity="0.5"/>
-            <feComposite in2="blur" operator="in"/>
-            <feMerge>
-              <feMergeNode/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-        </defs>
-
-        <rect x="0" y="0" width="600" height="480" fill="#f8fafc" rx="16"/>
-
-        {/* Zona Norte */}
-        <g 
-          className="cursor-pointer transition-all duration-300"
-          onClick={() => onZoneClick("Zona Norte")}
-          onMouseEnter={() => setHoveredZone("Zona Norte")}
-          onMouseLeave={() => setHoveredZone(null)}
-          filter={isSelected("Zona Norte") ? "url(#glowEffect)" : "url(#dropShadow)"}
-        >
-          <path
-            d="M 145 50 
-               C 175 38, 220 30, 260 28 
-               C 310 26, 360 30, 400 42 
-               C 435 55, 460 75, 475 105 
-               C 485 130, 480 155, 460 175 
-               C 440 192, 405 200, 365 205 
-               C 320 210, 275 208, 235 200 
-               C 195 192, 160 180, 140 160 
-               C 115 135, 115 100, 145 50 Z"
-            fill={getZoneColor("Zona Norte")}
-            fillOpacity={getZoneOpacity("Zona Norte")}
-            stroke={getStrokeColor("Zona Norte")}
-            strokeWidth={getStrokeWidth("Zona Norte")}
-            strokeLinejoin="round"
-            style={{ transition: "all 0.3s ease" }}
-          />
-          <text 
-            x="300" 
-            y="105" 
-            textAnchor="middle" 
-            className="fill-white text-sm font-bold pointer-events-none"
-            style={{ textShadow: "0 2px 4px rgba(0,0,0,0.5)" }}
-          >
-            Zona Norte
-          </text>
-          <text 
-            x="300" 
-            y="128" 
-            textAnchor="middle" 
-            className="fill-white/90 text-xs font-medium pointer-events-none"
-            style={{ textShadow: "0 1px 2px rgba(0,0,0,0.5)" }}
-          >
-            {zoneInfo("Zona Norte")?.coverage}% cobertura
-          </text>
-        </g>
-
-        {/* Zona Oeste */}
-        <g 
-          className="cursor-pointer transition-all duration-300"
-          onClick={() => onZoneClick("Zona Oeste")}
-          onMouseEnter={() => setHoveredZone("Zona Oeste")}
-          onMouseLeave={() => setHoveredZone(null)}
-          filter={isSelected("Zona Oeste") ? "url(#glowEffect)" : "url(#dropShadow)"}
-        >
-          <path
-            d="M 140 160 
-               C 160 180, 195 192, 235 200 
-               C 225 230, 215 260, 200 290 
-               C 180 325, 150 355, 120 370 
-               C 85 385, 50 380, 30 355 
-               C 10 325, 15 285, 30 250 
-               C 50 210, 85 180, 140 160 Z"
-            fill={getZoneColor("Zona Oeste")}
-            fillOpacity={getZoneOpacity("Zona Oeste")}
-            stroke={getStrokeColor("Zona Oeste")}
-            strokeWidth={getStrokeWidth("Zona Oeste")}
-            strokeLinejoin="round"
-            style={{ transition: "all 0.3s ease" }}
-          />
-          <text 
-            x="115" 
-            y="260" 
-            textAnchor="middle" 
-            className="fill-white text-sm font-bold pointer-events-none"
-            style={{ textShadow: "0 2px 4px rgba(0,0,0,0.5)" }}
-          >
-            Zona Oeste
-          </text>
-          <text 
-            x="115" 
-            y="283" 
-            textAnchor="middle" 
-            className="fill-white/90 text-xs font-medium pointer-events-none"
-            style={{ textShadow: "0 1px 2px rgba(0,0,0,0.5)" }}
-          >
-            {zoneInfo("Zona Oeste")?.coverage}% cobertura
-          </text>
-        </g>
-
-        {/* Centro */}
-        <g 
-          className="cursor-pointer transition-all duration-300"
-          onClick={() => onZoneClick("Centro")}
-          onMouseEnter={() => setHoveredZone("Centro")}
-          onMouseLeave={() => setHoveredZone(null)}
-          filter={isSelected("Centro") ? "url(#glowEffect)" : "url(#dropShadow)"}
-        >
-          <path
-            d="M 235 200 
-               C 275 208, 320 210, 365 205 
-               C 380 230, 385 260, 380 290 
-               C 370 320, 345 345, 310 355 
-               C 270 365, 230 360, 200 345 
-               C 175 330, 165 305, 170 275 
-               C 178 245, 200 220, 235 200 Z"
-            fill={getZoneColor("Centro")}
-            fillOpacity={getZoneOpacity("Centro")}
-            stroke={getStrokeColor("Centro")}
-            strokeWidth={getStrokeWidth("Centro")}
-            strokeLinejoin="round"
-            style={{ transition: "all 0.3s ease" }}
-          />
-          <text 
-            x="280" 
-            y="270" 
-            textAnchor="middle" 
-            className="fill-white text-sm font-bold pointer-events-none"
-            style={{ textShadow: "0 2px 4px rgba(0,0,0,0.5)" }}
-          >
-            Centro
-          </text>
-          <text 
-            x="280" 
-            y="293" 
-            textAnchor="middle" 
-            className="fill-white/90 text-xs font-medium pointer-events-none"
-            style={{ textShadow: "0 1px 2px rgba(0,0,0,0.5)" }}
-          >
-            {zoneInfo("Centro")?.coverage}% cobertura
-          </text>
-        </g>
-
-        {/* Zona Leste */}
-        <g 
-          className="cursor-pointer transition-all duration-300"
-          onClick={() => onZoneClick("Zona Leste")}
-          onMouseEnter={() => setHoveredZone("Zona Leste")}
-          onMouseLeave={() => setHoveredZone(null)}
-          filter={isSelected("Zona Leste") ? "url(#glowEffect)" : "url(#dropShadow)"}
-        >
-          <path
-            d="M 365 205 
-               C 405 200, 440 192, 460 175 
-               C 495 190, 530 215, 555 250 
-               C 580 290, 590 340, 575 385 
-               C 555 430, 510 455, 455 460 
-               C 400 465, 355 450, 325 420 
-               C 345 395, 360 365, 370 335 
-               C 380 300, 385 260, 380 230 
-               C 378 215, 372 208, 365 205 Z"
-            fill={getZoneColor("Zona Leste")}
-            fillOpacity={getZoneOpacity("Zona Leste")}
-            stroke={getStrokeColor("Zona Leste")}
-            strokeWidth={getStrokeWidth("Zona Leste")}
-            strokeLinejoin="round"
-            style={{ transition: "all 0.3s ease" }}
-          />
-          <text 
-            x="465" 
-            y="320" 
-            textAnchor="middle" 
-            className="fill-white text-sm font-bold pointer-events-none"
-            style={{ textShadow: "0 2px 4px rgba(0,0,0,0.5)" }}
-          >
-            Zona Leste
-          </text>
-          <text 
-            x="465" 
-            y="343" 
-            textAnchor="middle" 
-            className="fill-white/90 text-xs font-medium pointer-events-none"
-            style={{ textShadow: "0 1px 2px rgba(0,0,0,0.5)" }}
-          >
-            {zoneInfo("Zona Leste")?.coverage}% cobertura
-          </text>
-        </g>
-
-        {/* Zona Sul */}
-        <g 
-          className="cursor-pointer transition-all duration-300"
-          onClick={() => onZoneClick("Zona Sul")}
-          onMouseEnter={() => setHoveredZone("Zona Sul")}
-          onMouseLeave={() => setHoveredZone(null)}
-          filter={isSelected("Zona Sul") ? "url(#glowEffect)" : "url(#dropShadow)"}
-        >
-          <path
-            d="M 120 370 
-               C 150 355, 180 325, 200 290 
-               C 215 260, 225 230, 235 200 
-               C 200 220, 178 245, 170 275 
-               C 165 305, 175 330, 200 345 
-               C 230 360, 270 365, 310 355 
-               C 325 380, 330 410, 320 440 
-               C 305 470, 265 490, 220 495 
-               C 165 500, 115 485, 85 455 
-               C 55 420, 55 385, 85 370 
-               C 95 365, 108 368, 120 370 Z"
-            fill={getZoneColor("Zona Sul")}
-            fillOpacity={getZoneOpacity("Zona Sul")}
-            stroke={getStrokeColor("Zona Sul")}
-            strokeWidth={getStrokeWidth("Zona Sul")}
-            strokeLinejoin="round"
-            style={{ transition: "all 0.3s ease" }}
-          />
-          <text 
-            x="200" 
-            y="420" 
-            textAnchor="middle" 
-            className="fill-white text-sm font-bold pointer-events-none"
-            style={{ textShadow: "0 2px 4px rgba(0,0,0,0.5)" }}
-          >
-            Zona Sul
-          </text>
-          <text 
-            x="200" 
-            y="443" 
-            textAnchor="middle" 
-            className="fill-white/90 text-xs font-medium pointer-events-none"
-            style={{ textShadow: "0 1px 2px rgba(0,0,0,0.5)" }}
-          >
-            {zoneInfo("Zona Sul")?.coverage}% cobertura
-          </text>
-        </g>
+        {/* Background */}
+        <rect x="0" y="0" width="400" height="280" fill="#f8fafc" rx="16"/>
+        
+        {/* Layout em cruz representando SP */}
+        {/* Zona Norte - topo */}
+        <ZoneCard zone="Zona Norte" x={120} y={15} width={160} height={70} />
+        
+        {/* Zona Oeste - esquerda */}
+        <ZoneCard zone="Zona Oeste" x={15} y={95} width={100} height={90} />
+        
+        {/* Centro - meio */}
+        <ZoneCard zone="Centro" x={125} y={95} width={150} height={90} />
+        
+        {/* Zona Leste - direita */}
+        <ZoneCard zone="Zona Leste" x={285} y={95} width={100} height={90} />
+        
+        {/* Zona Sul - baixo */}
+        <ZoneCard zone="Zona Sul" x={120} y={195} width={160} height={70} />
 
         {/* Legenda */}
-        <g transform="translate(90, 485)">
-          <rect x="0" y="0" width="420" height="28" rx="14" fill="white" stroke="#e2e8f0" strokeWidth="1.5"/>
-          <rect x="10" y="8" width="400" height="12" rx="6" fill="url(#legendGradient)"/>
+        <g transform="translate(40, 290)">
+          <rect x="0" y="0" width="320" height="24" rx="12" fill="white" stroke="#e2e8f0" strokeWidth="1"/>
+          <rect x="8" y="6" width="304" height="12" rx="6" fill="url(#legendGradientSimple)"/>
         </g>
-        <text x="90" y="528" className="text-[10px] fill-muted-foreground font-medium">Baixa</text>
-        <text x="510" y="528" textAnchor="end" className="text-[10px] fill-muted-foreground font-medium">Alta</text>
-        <text x="300" y="528" textAnchor="middle" className="text-[10px] fill-muted-foreground font-semibold">Cobertura Vacinal</text>
+        
+        <defs>
+          <linearGradient id="legendGradientSimple" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#ef4444"/>
+            <stop offset="25%" stopColor="#f97316"/>
+            <stop offset="50%" stopColor="#eab308"/>
+            <stop offset="75%" stopColor="#22c55e"/>
+            <stop offset="100%" stopColor="#10b981"/>
+          </linearGradient>
+        </defs>
       </svg>
+      
+      {/* Labels da legenda */}
+      <div className="flex justify-between px-10 -mt-1 text-[10px] text-muted-foreground">
+        <span>Baixa cobertura</span>
+        <span>Alta cobertura</span>
+      </div>
 
       {selectedZone !== "Todas" && (
         <Badge 
           variant="secondary" 
-          className="absolute top-4 left-4 gap-2 bg-white/95 backdrop-blur-sm shadow-md border"
+          className="absolute top-3 left-3 gap-1.5 bg-white/95 backdrop-blur-sm shadow-sm border text-xs"
         >
-          <MapPin className="h-3.5 w-3.5 text-primary" />
+          <MapPin className="h-3 w-3 text-primary" />
           {selectedZone}
           <button 
             onClick={() => onZoneClick(selectedZone)}
-            className="ml-1 hover:text-destructive transition-colors"
+            className="ml-0.5 hover:text-destructive transition-colors"
           >
             x
           </button>
