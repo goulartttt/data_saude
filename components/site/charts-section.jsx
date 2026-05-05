@@ -28,7 +28,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { realDiseaseData, monthKeys, monthNames, getDiseaseSummary, formatNumber } from "@/lib/health-data"
-import { Calendar, Filter, TrendingUp, TrendingDown, X, Activity, Bug, HeartPulse, AlertTriangle, Virus } from "lucide-react"
+import { Calendar, Filter, TrendingUp, TrendingDown, X, Activity, Bug, HeartPulse, AlertTriangle, ShieldAlert } from "lucide-react"
 
 // Gerar dados para graficos a partir dos dados reais
 const generateChartData = () => {
@@ -300,7 +300,7 @@ export function ChartsSection() {
                   </p>
                 </div>
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
-                  <Virus className="h-6 w-6 text-blue-600" />
+                  <ShieldAlert className="h-6 w-6 text-blue-600" />
                 </div>
               </div>
             </CardContent>
