@@ -10,7 +10,7 @@ import {
   Minus,
   AlertTriangle,
   Activity,
-  Virus
+  ShieldAlert
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -42,7 +42,7 @@ const getTrendIcon = (trend) => {
 const diseaseConfig = {
   Dengue: { icon: Bug, color: "#ef4444" },
   HIV: { icon: HeartPulse, color: "#8b5cf6" },
-  AIDS: { icon: Virus, color: "#3b82f6" },
+  AIDS: { icon: ShieldAlert, color: "#3b82f6" },
   Malaria: { icon: AlertTriangle, color: "#f59e0b" },
 }
 
