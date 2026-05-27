@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import useSWR from "swr"
 import { 
   Bug, 
   HeartPulse, 
@@ -19,7 +20,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { diseaseData, formatNumber, getDiseaseSummary, realDiseaseData, monthKeys } from "@/lib/health-data"
+import { formatNumber, monthKeys } from "@/lib/health-data"
 
 // Estados em alerta com cobertura abaixo de 60%
 const estadosEmAlerta = [
@@ -46,16 +47,24 @@ const diseaseConfig = {
   Malaria: { icon: AlertTriangle, color: "#f59e0b" },
 }
 
+const fetcher = (url) => fetch(url).then(res => res.json())
+
 export function StatsSection() {
   const [mounted, setMounted] = useState(false)
-  const summary = getDiseaseSummary()
+
+  // Buscar dados do banco de dados
+  const { data: summaryResponse, isLoading } = useSWR('/api/disease-data?type=summary', fetcher)
+  const { data: allDataResponse } = useSWR('/api/disease-data?type=all', fetcher)
+
+  const summary = summaryResponse?.success ? summaryResponse.data : {}
+  const allData = allDataResponse?.success ? allDataResponse.data : []
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
   // Calcular totais reais
-  const totalCases = Object.values(summary).reduce((sum, d) => sum + d.totalGeral, 0)
+  const totalCases = Object.values(summary).reduce((sum, d) => sum + (d?.totalGeral || 0), 0)
 
   return (
     <section id="dashboard" className="py-16 bg-muted/30">
@@ -83,7 +92,7 @@ export function StatsSection() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {mounted ? formatNumber(totalCases) : "..."}
+                {mounted && !isLoading ? formatNumber(totalCases) : "..."}
               </div>
               <p className="text-xs text-muted-foreground">
                 Dengue, HIV, AIDS e Malaria (2024-2025)
@@ -100,11 +109,11 @@ export function StatsSection() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-600">
-                {mounted ? formatNumber(summary.Dengue?.totalGeral || 0) : "..."}
+                {mounted && !isLoading ? formatNumber(summary.Dengue?.totalGeral || 0) : "..."}
               </div>
               <p className="text-xs text-muted-foreground">
                 <span className={summary.Dengue?.variacao < 0 ? "text-green-600" : "text-red-600"}>
-                  {summary.Dengue?.variacao > 0 ? "+" : ""}{summary.Dengue?.variacao}%
+                  {summary.Dengue?.variacao > 0 ? "+" : ""}{summary.Dengue?.variacao || 0}%
                 </span> vs 2024
               </p>
             </CardContent>
@@ -171,22 +180,21 @@ export function StatsSection() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {Object.entries(summary).map(([key, disease]) => {
             const config = diseaseConfig[key]
-            if (!config) return null
+            if (!config || !disease) return null
             
             const { Icon: TrendIcon, color: trendColor, bg: trendBg, label: trendLabel } = getTrendIcon(disease.tendencia)
             const DiseaseIcon = config.icon
 
             // Obter dados mensais para o mini grafico
-            const diseaseRecord2024 = realDiseaseData.find(d => d.doenca === key && d.ano === 2024)
-            const diseaseRecord2025 = realDiseaseData.find(d => d.doenca === key && d.ano === 2025)
+            const diseaseRecord2025 = allData.find(d => d.doenca === key && d.ano === 2025)
             
             const last6Months = [
-              { month: "Jul", value: diseaseRecord2025?.[monthKeys[6]] || 0 },
-              { month: "Ago", value: diseaseRecord2025?.[monthKeys[7]] || 0 },
-              { month: "Set", value: diseaseRecord2025?.[monthKeys[8]] || 0 },
-              { month: "Out", value: diseaseRecord2025?.[monthKeys[9]] || 0 },
-              { month: "Nov", value: diseaseRecord2025?.[monthKeys[10]] || 0 },
-              { month: "Dez", value: diseaseRecord2025?.[monthKeys[11]] || 0 },
+              { month: "Jul", value: diseaseRecord2025?.jul || 0 },
+              { month: "Ago", value: diseaseRecord2025?.ago || 0 },
+              { month: "Set", value: diseaseRecord2025?.setem || 0 },
+              { month: "Out", value: diseaseRecord2025?.outu || 0 },
+              { month: "Nov", value: diseaseRecord2025?.nove || 0 },
+              { month: "Dez", value: diseaseRecord2025?.deze || 0 },
             ]
 
             return (
@@ -204,7 +212,7 @@ export function StatsSection() {
                         />
                       </div>
                       <div>
-                        <CardTitle className="text-lg">{disease.nome}</CardTitle>
+                        <CardTitle className="text-lg">{key}</CardTitle>
                         <p className="text-xs text-muted-foreground">2024-2025</p>
                       </div>
                     </div>
@@ -219,13 +227,13 @@ export function StatsSection() {
                     <div>
                       <p className="text-sm text-muted-foreground">2024</p>
                       <p className="text-xl font-bold">
-                        {mounted ? formatNumber(disease.total2024) : "..."}
+                        {mounted && !isLoading ? formatNumber(disease.total2024) : "..."}
                       </p>
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">2025</p>
                       <p className="text-xl font-bold">
-                        {mounted ? formatNumber(disease.total2025) : "..."}
+                        {mounted && !isLoading ? formatNumber(disease.total2025) : "..."}
                       </p>
                     </div>
                   </div>
@@ -233,7 +241,7 @@ export function StatsSection() {
                     <div className="flex justify-between items-center">
                       <p className="text-sm text-muted-foreground">Total</p>
                       <p className="text-lg font-bold" style={{ color: config.color }}>
-                        {mounted ? formatNumber(disease.totalGeral) : "..."}
+                        {mounted && !isLoading ? formatNumber(disease.totalGeral) : "..."}
                       </p>
                     </div>
                   </div>

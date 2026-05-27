@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo } from "react"
+import useSWR from "swr"
 import {
   LineChart,
   Line,
@@ -27,20 +28,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { realDiseaseData, monthKeys, monthNames, getDiseaseSummary, formatNumber } from "@/lib/health-data"
+import { monthKeys, monthNames, formatNumber } from "@/lib/health-data"
 import { Calendar, Filter, TrendingUp, TrendingDown, X, Activity, Bug, HeartPulse, AlertTriangle, ShieldAlert } from "lucide-react"
 
-// Gerar dados para graficos a partir dos dados reais
-const generateChartData = () => {
+const fetcher = (url) => fetch(url).then(res => res.json())
+
+// Gerar dados para graficos a partir dos dados do banco
+const generateChartData = (dbData) => {
+  if (!dbData || dbData.length === 0) return []
+  
   const data = []
   const years = [2024, 2025]
 
   years.forEach(year => {
     monthKeys.forEach((monthKey, idx) => {
-      const dengueRecord = realDiseaseData.find(d => d.doenca === "Dengue" && d.ano === year)
-      const hivRecord = realDiseaseData.find(d => d.doenca === "HIV" && d.ano === year)
-      const aidsRecord = realDiseaseData.find(d => d.doenca === "AIDS" && d.ano === year)
-      const malariaRecord = realDiseaseData.find(d => d.doenca === "Malaria" && d.ano === year)
+      const dengueRecord = dbData.find(d => d.doenca === "Dengue" && d.ano === year)
+      const hivRecord = dbData.find(d => d.doenca === "HIV" && d.ano === year)
+      const aidsRecord = dbData.find(d => d.doenca === "AIDS" && d.ano === year)
+      const malariaRecord = dbData.find(d => d.doenca === "Malaria" && d.ano === year)
 
       data.push({
         date: `${year}-${String(idx + 1).padStart(2, '0')}`,
@@ -58,8 +63,6 @@ const generateChartData = () => {
 
   return data
 }
-
-const fullData = generateChartData()
 
 // Opcoes de filtro predefinidas
 const presetFilters = [
@@ -139,13 +142,22 @@ function DateRangeFilter({ selectedYear, onYearChange, onClear }) {
 
 export function ChartsSection() {
   const [selectedYear, setSelectedYear] = useState("all")
-  const summary = getDiseaseSummary()
+  
+  // Buscar dados do banco de dados
+  const { data: allDataResponse, isLoading } = useSWR('/api/disease-data?type=all', fetcher)
+  const { data: summaryResponse } = useSWR('/api/disease-data?type=summary', fetcher)
+  
+  const dbData = allDataResponse?.success ? allDataResponse.data : []
+  const summary = summaryResponse?.success ? summaryResponse.data : {}
+  
+  // Gerar dados do grafico a partir dos dados do banco
+  const fullData = useMemo(() => generateChartData(dbData), [dbData])
 
   // Aplicar filtro de ano
   const filteredData = useMemo(() => {
     if (selectedYear === "all") return fullData
     return fullData.filter(item => item.year === parseInt(selectedYear))
-  }, [selectedYear])
+  }, [selectedYear, fullData])
 
   // Calcular estatisticas do periodo filtrado
   const periodStats = useMemo(() => {
@@ -180,6 +192,7 @@ export function ChartsSection() {
 
   // Dados para grafico de barras comparativo
   const comparisonData = useMemo(() => {
+    if (!summary || Object.keys(summary).length === 0) return []
     return [
       {
         doenca: "Dengue",
