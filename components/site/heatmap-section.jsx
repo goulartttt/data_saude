@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
+import useSWR from "swr"
 import { 
   MapPin, 
   AlertTriangle, 
@@ -28,7 +29,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { zonesData, zoneSummary, awarenessContent, formatNumber, getRiskLevel, realDiseaseData } from "@/lib/health-data"
+import { zonesData, zoneSummary, awarenessContent, formatNumber, getRiskLevel } from "@/lib/health-data"
+
+const fetcher = (url) => fetch(url).then(res => res.json())
 
 const zones = ["Todas", "Zona Norte", "Zona Sul", "Zona Leste", "Zona Oeste", "Centro"]
 
@@ -218,6 +221,10 @@ export function HeatmapSection() {
   const [selectedMetric, setSelectedMetric] = useState("coverage")
   const [selectedNeighborhood, setSelectedNeighborhood] = useState(null)
 
+  // Buscar dados do banco de dados
+  const { data: allDataResponse } = useSWR('/api/disease-data?type=all', fetcher)
+  const dbData = allDataResponse?.success ? allDataResponse.data : []
+
   const handleZoneClick = (zone) => {
     setSelectedZone(selectedZone === zone ? "Todas" : zone)
     setSelectedNeighborhood(null)
@@ -318,20 +325,23 @@ export function HeatmapSection() {
     return awarenessContent.ubsList.find(ubs => ubs.zone === selectedNeighborhood.zone)
   }, [selectedNeighborhood])
 
-  // Totais de doencas reais
+  // Totais de doencas reais do banco
   const diseaseTotals = useMemo(() => {
-    const dengue2024 = realDiseaseData.find(d => d.doenca === "Dengue" && d.ano === 2024)?.TOTAL_ANUAL || 0
-    const dengue2025 = realDiseaseData.find(d => d.doenca === "Dengue" && d.ano === 2025)?.TOTAL_ANUAL || 0
+    if (!dbData || dbData.length === 0) {
+      return { dengue: 0, hiv: 0, aids: 0, malaria: 0 }
+    }
+    const dengue2024 = dbData.find(d => d.doenca === "Dengue" && d.ano === 2024)?.total_anual || 0
+    const dengue2025 = dbData.find(d => d.doenca === "Dengue" && d.ano === 2025)?.total_anual || 0
     return {
       dengue: dengue2024 + dengue2025,
-      hiv: (realDiseaseData.find(d => d.doenca === "HIV" && d.ano === 2024)?.TOTAL_ANUAL || 0) +
-           (realDiseaseData.find(d => d.doenca === "HIV" && d.ano === 2025)?.TOTAL_ANUAL || 0),
-      aids: (realDiseaseData.find(d => d.doenca === "AIDS" && d.ano === 2024)?.TOTAL_ANUAL || 0) +
-            (realDiseaseData.find(d => d.doenca === "AIDS" && d.ano === 2025)?.TOTAL_ANUAL || 0),
-      malaria: (realDiseaseData.find(d => d.doenca === "Malaria" && d.ano === 2024)?.TOTAL_ANUAL || 0) +
-               (realDiseaseData.find(d => d.doenca === "Malaria" && d.ano === 2025)?.TOTAL_ANUAL || 0),
+      hiv: (dbData.find(d => d.doenca === "HIV" && d.ano === 2024)?.total_anual || 0) +
+           (dbData.find(d => d.doenca === "HIV" && d.ano === 2025)?.total_anual || 0),
+      aids: (dbData.find(d => d.doenca === "AIDS" && d.ano === 2024)?.total_anual || 0) +
+            (dbData.find(d => d.doenca === "AIDS" && d.ano === 2025)?.total_anual || 0),
+      malaria: (dbData.find(d => d.doenca === "Malaria" && d.ano === 2024)?.total_anual || 0) +
+               (dbData.find(d => d.doenca === "Malaria" && d.ano === 2025)?.total_anual || 0),
     }
-  }, [])
+  }, [dbData])
 
   return (
     <section id="mapa" className="py-16 bg-gradient-to-b from-muted/30 to-background">

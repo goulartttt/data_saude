@@ -1,35 +1,64 @@
-# data_saude
+# Data Saude
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [v0](https://v0.app).
+Plataforma de monitoramento de saude publica de Sao Paulo com dados reais de doencas infecciosas.
 
-## Built with v0
+## Sobre o Projeto
 
-This repository is linked to a [v0](https://v0.app) project. You can continue developing by visiting the link below -- start new chats to make changes, and v0 will push commits directly to this repo. Every merge to `main` will automatically deploy.
+Este projeto apresenta um painel interativo com dados de saude publica, incluindo:
 
-[Continue working on v0 →](https://v0.app/chat/projects/prj_xkwF52nu8wvCmd0a7Kk0LIpUp61J)
+- **Dashboard de Doencas**: Visualizacao de casos de AIDS, Dengue, HIV e Malaria
+- **Graficos Interativos**: Evolucao temporal dos casos por mes e ano
+- **Mapa de Risco**: Visualizacao geografica por zonas e bairros
+- **Dados de Vacinacao**: Cobertura vacinal por regiao
+- **Conscientizacao**: Informacoes sobre prevencao e postos de saude
 
-## Getting Started
+## Tecnologias
 
-First, run the development server:
+- [Next.js](https://nextjs.org) - Framework React
+- [Supabase](https://supabase.com) - Banco de dados PostgreSQL
+- [Tailwind CSS](https://tailwindcss.com) - Estilizacao
+- [shadcn/ui](https://ui.shadcn.com) - Componentes de interface
+- [Recharts](https://recharts.org) - Graficos interativos
+- [Leaflet](https://leafletjs.com) - Mapas interativos
+
+## Primeiros Passos
+
+1. Clone o repositorio
+2. Instale as dependencias:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+```
+
+3. Configure as variaveis de ambiente:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=sua_url_supabase
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_chave_anonima
+```
+
+4. Execute o servidor de desenvolvimento:
+
+```bash
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+5. Abra [http://localhost:3000](http://localhost:3000) no navegador.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Estrutura do Banco de Dados
 
-## Learn More
+O projeto utiliza uma tabela `disease_monthly_data` com a seguinte estrutura:
 
-To learn more, take a look at the following resources:
+- `id`: Identificador unico
+- `doenca`: Nome da doenca (AIDS, Dengue, HIV, Malaria)
+- `ano`: Ano de referencia
+- `jan` a `deze`: Casos mensais
+- `total_anual`: Total de casos no ano
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-- [v0 Documentation](https://v0.app/docs) - learn about v0 and how to use it.
+## Fontes de Dados
 
-<a href="https://v0.app/chat/api/kiro/clone/goulartttt/data_saude" alt="Open in Kiro"><img src="https://pdgvvgmkdvyeydso.public.blob.vercel-storage.com/open%20in%20kiro.svg?sanitize=true" /></a>
+Os dados apresentados sao baseados em informacoes de saude publica do Brasil.
+
+## Licenca
+
+Este projeto e de uso educacional e informativo.
